@@ -1,3 +1,5 @@
+import type { CoachProfile } from './coach';
+
 export type MealSlot = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'other';
 
 export const MEAL_SLOTS: { id: MealSlot; label: string }[] = [
@@ -87,6 +89,8 @@ export interface Settings {
   fatTarget: number;
   weightGoalKg: number;
   startWeightKg: number;
+  /** Last questionnaire answers, kept to prefill it; absent if it was skipped. */
+  profile?: CoachProfile;
 }
 
 /** How the Claude prompts describe the user's aim, from where they are and where they want to be. */

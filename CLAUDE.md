@@ -70,7 +70,9 @@ This is where the important invariants are; read it before touching a screen.
 - `coach.ts` — pure, rule-based maths behind the welcome questionnaire: `computeTargets()`
   (Mifflin-St Jeor × activity factor, pace-based deficit, a calorie floor it never goes under)
   and `buildProgram()` (four weeks of sessions for `WorkoutsService.createMany()`). No AI and no
-  network; covered by `coach.spec.ts`. The answers themselves are not stored.
+  network; covered by `coach.spec.ts`. The answers are kept in `Settings.profile` to prefill the
+  questionnaire when it is reopened from Réglages at `/objectif` — the same `WelcomePage`, in
+  `editing` mode (keeps `startWeightKg`, adding a new programme is opt-in).
 
 ### Account sync (`core/sync.service.ts`, Supabase)
 

@@ -37,5 +37,11 @@ export const routes: Routes = [
     title: 'Réglages',
     loadComponent: () => import('./settings/settings.page').then((m) => m.SettingsPage),
   },
+  {
+    // Not in the tab bar: reached from Réglages to redo the questionnaire.
+    path: 'objectif',
+    title: 'Mon objectif',
+    loadComponent: () => import('./welcome/welcome.page').then((m) => m.WelcomePage),
+  },
   { path: '**', redirectTo: 'journal' },
 ];

@@ -1,4 +1,4 @@
-<h1>Bienvenue 👋</h1>
+<h1>{{ editing ? 'Mon objectif' : 'Bienvenue 👋' }}</h1>
 
 @if (error(); as e) {
   <p class="flash ko">{{ e }}</p>
@@ -6,8 +6,13 @@
 
 @if (step() === 'questions') {
   <p class="muted intro">
-    Réponds à quelques questions : on calcule tes cibles et un programme de
-    {{ programWeeks }} semaines. Tout reste modifiable ensuite.
+    @if (editing) {
+      Mets à jour tes réponses pour recalculer tes cibles et, si tu veux, un nouveau programme de
+      {{ programWeeks }} semaines.
+    } @else {
+      Réponds à quelques questions : on calcule tes cibles et un programme de
+      {{ programWeeks }} semaines. Tout reste modifiable ensuite.
+    }
   </p>
 
   <section class="card">
@@ -117,10 +122,17 @@
     <button class="btn btn-primary full" [disabled]="!canCompute()" (click)="compute()">
       Calculer mon programme
     </button>
-    <button class="btn full" (click)="skip()">Je connais déjà mes cibles</button>
+    <button class="btn full" (click)="skip()">
+      {{ editing ? 'Modifier mes cibles à la main' : 'Je connais déjà mes cibles' }}
+    </button>
+    @if (editing) {
+      <a class="btn full" routerLink="/reglages">Annuler</a>
+    }
   </section>
 
-  <app-account-panel />
+  @if (!editing) {
+    <app-account-panel />
+  }
 } @else {
   @if (plan(); as p) {
     <section class="card">
@@ -246,6 +258,8 @@
     </section>
   }
 
-  <button class="btn btn-primary full" [disabled]="!canStart()" (click)="start()">Commencer</button>
+  <button class="btn btn-primary full" [disabled]="!canStart()" (click)="start()">
+    {{ editing ? 'Enregistrer' : 'Commencer' }}
+  </button>
   <button class="btn full" [disabled]="busy()" (click)="step.set('questions')">Retour</button>
 }

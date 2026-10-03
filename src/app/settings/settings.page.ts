@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { DataService } from '../core/data.service';
 import { SettingsService } from '../core/settings.service';
 import { toDateKey } from '../core/models';
@@ -8,7 +9,7 @@ import { AccountPanel } from '../shared/account-panel';
 
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule, AccountPanel],
+  imports: [FormsModule, AccountPanel, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',
@@ -29,6 +30,7 @@ export class SettingsPage {
     const d = this.draft();
     await this.run('Cibles enregistrées.', () =>
       this.settingsService.save({
+        ...d,
         id: 'settings',
         kcalTarget: Number(d.kcalTarget) || 0,
         proteinTarget: Number(d.proteinTarget) || 0,

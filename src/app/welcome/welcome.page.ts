@@ -1,6 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import {
   ACTIVITY_LEVELS,
   PACES,
@@ -16,7 +17,7 @@ import {
   type TrainingLevel,
 } from '../core/coach';
 import { fromDateKey, toDateKey, type Workout } from '../core/models';
-import { DEFAULT_SETTINGS, SettingsService } from '../core/settings.service';
+import { SettingsService } from '../core/settings.service';
 import { WeightService } from '../core/weight.service';
 import { WorkoutsService } from '../core/workouts.service';
 import { AccountPanel } from '../shared/account-panel';
@@ -24,22 +25,31 @@ import { AccountPanel } from '../shared/account-panel';
 type Step = 'questions' | 'proposal';
 
 /**
- * First-launch flow: the app ships with no personal values, so a short
- * questionnaire works out daily targets and a four-week training programme
- * (see `core/coach.ts`), which the user can adjust before starting. `App`
- * renders this for as long as no settings are saved.
+ * Questionnaire that works out daily targets and a four-week training
+ * programme (see `core/coach.ts`), which the user can adjust before saving.
+ *
+ * Used twice: `App` renders it on first launch, for as long as no settings are
+ * saved (the app ships with no personal values), and the `/objectif` route
+ * reopens it later, prefilled, to change the goal or the targets.
  */
 @Component({
   selector: 'app-welcome',
-  imports: [FormsModule, AccountPanel, DecimalPipe],
+  imports: [FormsModule, AccountPanel, DecimalPipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './welcome.page.html',
   styleUrl: './welcome.page.scss',
+  host: { '[class.standalone]': '!editing' },
 })
 export class WelcomePage {
   private readonly settings = inject(SettingsService);
   private readonly weight = inject(WeightService);
   private readonly workouts = inject(WorkoutsService);
+  private readonly router = inject(Router);
+
+  /** True when reopened from the settings: targets already exist and are being changed. */
+  protected readonly editing = this.settings.configured();
+  private readonly saved = this.settings.settings();
+  private readonly answers = this.saved.profile;
 
   protected readonly activityLevels = ACTIVITY_LEVELS;
   protected readonly paces = PACES;
@@ -47,23 +57,25 @@ export class WelcomePage {
 
   protected readonly step = signal<Step>('questions');
 
-  // Questionnaire answers.
-  protected readonly sex = signal<Sex>('male');
-  protected readonly age = signal<number | null>(null);
-  protected readonly heightCm = signal<number | null>(null);
-  protected readonly currentKg = signal<number | null>(null);
-  protected readonly goalKg = signal<number | null>(null);
-  protected readonly activity = signal<ActivityLevel>('light');
-  protected readonly pace = signal<Pace>('moderate');
-  protected readonly sessionsPerWeek = signal<2 | 3 | 4>(3);
-  protected readonly level = signal<TrainingLevel>('beginner');
-  protected readonly equipment = signal<Equipment>('gym');
+  // Questionnaire answers, prefilled with the previous ones when there are any.
+  protected readonly sex = signal<Sex>(this.answers?.sex ?? 'male');
+  protected readonly age = signal<number | null>(this.answers?.age ?? null);
+  protected readonly heightCm = signal<number | null>(this.answers?.heightCm ?? null);
+  protected readonly currentKg = signal<number | null>(
+    this.editing ? (this.weight.latest()?.weightKg ?? this.saved.startWeightKg) : null,
+  );
+  protected readonly goalKg = signal<number | null>(this.editing ? this.saved.weightGoalKg : null);
+  protected readonly activity = signal<ActivityLevel>(this.answers?.activity ?? 'light');
+  protected readonly pace = signal<Pace>(this.answers?.pace ?? 'moderate');
+  protected readonly sessionsPerWeek = signal<2 | 3 | 4>(this.answers?.sessionsPerWeek ?? 3);
+  protected readonly level = signal<TrainingLevel>(this.answers?.level ?? 'beginner');
+  protected readonly equipment = signal<Equipment>(this.answers?.equipment ?? 'gym');
 
-  // Proposed targets, editable before starting.
-  protected readonly kcal = signal<number | null>(DEFAULT_SETTINGS.kcalTarget);
-  protected readonly protein = signal<number | null>(DEFAULT_SETTINGS.proteinTarget);
-  protected readonly carbs = signal<number | null>(DEFAULT_SETTINGS.carbsTarget);
-  protected readonly fat = signal<number | null>(DEFAULT_SETTINGS.fatTarget);
+  // Proposed targets, editable before saving.
+  protected readonly kcal = signal<number | null>(this.saved.kcalTarget);
+  protected readonly protein = signal<number | null>(this.saved.proteinTarget);
+  protected readonly carbs = signal<number | null>(this.saved.carbsTarget);
+  protected readonly fat = signal<number | null>(this.saved.fatTarget);
 
   /** Null when the user skipped the questionnaire and types their own targets. */
   protected readonly profile = signal<CoachProfile | null>(null);
@@ -120,7 +132,8 @@ export class WelcomePage {
     this.carbs.set(targets.carbs);
     this.fat.set(targets.fat);
     this.profile.set(profile);
-    this.addProgram.set(true);
+    // A returning user may still be following a programme: adding another one is opt-in.
+    this.addProgram.set(!this.editing);
     this.step.set('proposal');
   }
 
@@ -139,9 +152,14 @@ export class WelcomePage {
     this.error.set(null);
     try {
       const currentKg = Number(this.currentKg());
-      await this.weight.add(toDateKey(new Date()), currentKg);
-      if (this.profile() && this.addProgram()) await this.workouts.createMany(this.program());
-      // Saved last: it is what makes `App` leave this screen.
+      const today = toDateKey(new Date());
+      // Log the weight typed here, unless it only repeats the latest weigh-in.
+      if (!this.editing || currentKg !== this.weight.latest()?.weightKg) {
+        await this.weight.add(today, currentKg);
+      }
+      const profile = this.profile();
+      if (profile && this.addProgram()) await this.workouts.createMany(this.program());
+      // Saved last: on first launch it is what makes `App` leave this screen.
       await this.settings.save({
         id: 'settings',
         kcalTarget: Number(this.kcal()) || 0,
@@ -149,8 +167,10 @@ export class WelcomePage {
         carbsTarget: Number(this.carbs()) || 0,
         fatTarget: Number(this.fat()) || 0,
         weightGoalKg: Number(this.goalKg()),
-        startWeightKg: currentKg,
+        startWeightKg: this.editing ? this.saved.startWeightKg : currentKg,
+        profile: profile ?? this.answers,
       });
+      if (this.editing) await this.router.navigateByUrl('/reglages');
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : 'Une erreur est survenue.');
     } finally {
