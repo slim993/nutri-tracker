@@ -1,0 +1,153 @@
+<h1>Entraînement</h1>
+
+<app-claude-panel
+  title="Programmer avec Claude"
+  [buildPrompt]="buildWorkoutPrompt"
+  [doImport]="importWorkoutPlan"
+/>
+
+<header class="week">
+  <button class="nav" (click)="shiftWeek(-1)" aria-label="Semaine précédente">‹</button>
+  <h2>{{ weekLabel() }}</h2>
+  <button class="nav" (click)="shiftWeek(1)" aria-label="Semaine suivante">›</button>
+</header>
+
+<section class="card list">
+  @for (workout of weekWorkouts(); track workout.id) {
+    <div class="entry" [class.past-undone]="!workout.done && workout.date < today">
+      <button
+        class="check"
+        (click)="workouts.toggleDone(workout.id)"
+        [attr.aria-label]="'Séance faite : ' + workout.name"
+      >
+        {{ workout.done ? '✅' : '⬜' }}
+      </button>
+      <button class="entry-main" (click)="startEdit(workout)">
+        <span class="title">
+          <span class="day">{{ pretty(workout.date) }}</span> — {{ workout.name }}
+        </span>
+        <span class="muted exercises">
+          @for (e of workout.exercises; track $index) {
+            <span>
+              {{ e.name }} {{ exerciseLabel(e) }}
+              @if (performedSummary(e); as done) {
+                <em class="done-badge">✓ {{ done }}</em>
+              }
+            </span>
+          }
+        </span>
+      </button>
+    </div>
+  } @empty {
+    <p class="empty">
+      Aucune séance cette semaine. Importe un plan de Claude ou crée une séance avec « + ».
+    </p>
+  }
+</section>
+
+<button class="fab" (click)="startCreate()" aria-label="Nouvelle séance">+</button>
+
+@if (draft(); as d) {
+  <div class="backdrop" (click)="draft.set(null)"></div>
+  <div class="sheet">
+    <h2>{{ d.id ? 'Modifier la séance' : 'Nouvelle séance' }}</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="w-date">Date</label>
+        <input id="w-date" type="date" [ngModel]="d.date" (ngModelChange)="patch('date', $event)" />
+      </div>
+      <div class="field">
+        <label for="w-name">Nom</label>
+        <input
+          id="w-name"
+          placeholder="Push, Legs…"
+          [ngModel]="d.name"
+          (ngModelChange)="patch('name', $event)"
+        />
+      </div>
+    </div>
+
+    <h3 class="ex-title">Exercices</h3>
+    @for (e of d.exercises; track $index; let exIndex = $index) {
+      <div class="ex-block">
+        <div class="ex-row">
+          <input
+            class="ex-name"
+            placeholder="Exercice"
+            aria-label="Nom de l'exercice"
+            [ngModel]="e.name"
+            (ngModelChange)="patchExercise(exIndex, 'name', $event)"
+          />
+          <input
+            type="number"
+            inputmode="numeric"
+            min="1"
+            aria-label="Séries prévues"
+            [ngModel]="e.sets"
+            (ngModelChange)="patchExercise(exIndex, 'sets', $event)"
+          />
+          <input
+            placeholder="reps"
+            aria-label="Répétitions prévues"
+            [ngModel]="e.reps"
+            (ngModelChange)="patchExercise(exIndex, 'reps', $event)"
+          />
+          <input
+            type="number"
+            inputmode="decimal"
+            step="0.5"
+            placeholder="kg"
+            aria-label="Poids prévu en kg"
+            [ngModel]="e.weightKg"
+            (ngModelChange)="patchExercise(exIndex, 'weightKg', $event)"
+          />
+          <button class="del" (click)="removeExercise(exIndex)" aria-label="Retirer l'exercice">
+            ✕
+          </button>
+        </div>
+
+        <div class="perf">
+          @for (p of e.performed ?? []; track $index; let setIndex = $index) {
+            <div class="perf-row">
+              <span class="perf-idx">{{ setIndex + 1 }}</span>
+              <input
+                type="number"
+                inputmode="decimal"
+                step="0.5"
+                placeholder="poids (kg)"
+                aria-label="Poids réalisé en kg"
+                [ngModel]="p.weightKg"
+                (ngModelChange)="patchPerformedSet(exIndex, setIndex, 'weightKg', $event)"
+              />
+              <input
+                type="number"
+                inputmode="numeric"
+                min="0"
+                placeholder="reps"
+                aria-label="Répétitions réalisées"
+                [ngModel]="p.reps"
+                (ngModelChange)="patchPerformedSet(exIndex, setIndex, 'reps', $event)"
+              />
+              <button
+                class="del"
+                (click)="removePerformedSet(exIndex, setIndex)"
+                aria-label="Retirer la série"
+              >
+                ✕
+              </button>
+            </div>
+          }
+          <button class="btn add-set" (click)="addPerformedSet(exIndex)">+ Série réalisée</button>
+        </div>
+      </div>
+    }
+    <button class="btn add-ex" (click)="addExercise()">+ Ajouter un exercice</button>
+
+    <div class="row">
+      @if (d.id; as id) {
+        <button class="btn btn-danger" (click)="remove(id)">Supprimer</button>
+      }
+      <button class="btn btn-primary" style="flex: 1" (click)="save()">Enregistrer</button>
+    </div>
+  </div>
+}

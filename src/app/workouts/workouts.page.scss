@@ -1,0 +1,127 @@
+@use '../shared/sheet';
+
+.week {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  h2 {
+    flex: 1;
+    text-align: center;
+  }
+
+  .nav {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+}
+
+.entry {
+  .check {
+    width: 42px;
+    height: 42px;
+    flex: none;
+    font-size: 1.1rem;
+  }
+
+  .title {
+    font-size: 0.95rem;
+  }
+
+  .day {
+    text-transform: capitalize;
+    color: var(--accent);
+  }
+
+  .exercises {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+
+  .done-badge {
+    font-style: normal;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  &.past-undone .title {
+    color: var(--text-dim);
+  }
+}
+
+.ex-title {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.ex-block {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--surface-2);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.ex-row {
+  display: grid;
+  grid-template-columns: 1fr 52px 62px 62px 32px;
+  gap: 6px;
+  align-items: center;
+
+  input {
+    padding: 8px 8px;
+    font-size: 15px;
+  }
+
+  .del {
+    color: var(--text-dim);
+  }
+}
+
+.perf {
+  margin: 8px 0 0 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--surface-2);
+}
+
+.perf-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 1fr 32px;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+
+  .perf-idx {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  input {
+    padding: 8px;
+    font-size: 15px;
+  }
+
+  .del {
+    color: var(--text-dim);
+  }
+}
+
+.add-set {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
+
+.add-ex {
+  width: 100%;
+  margin: 6px 0 16px;
+}

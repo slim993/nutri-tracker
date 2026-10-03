@@ -1,0 +1,56 @@
+<h1>Réglages</h1>
+
+@if (message(); as m) {
+  <p class="flash ok">{{ m }}</p>
+}
+@if (error(); as e) {
+  <p class="flash ko">{{ e }}</p>
+}
+
+<section class="card">
+  <h2>Cibles quotidiennes</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="kcal">Calories</label>
+      <input id="kcal" type="number" inputmode="numeric" [ngModel]="draft().kcalTarget" (ngModelChange)="patch('kcalTarget', $event)" />
+    </div>
+    <div class="field">
+      <label for="prot">Protéines (g)</label>
+      <input id="prot" type="number" inputmode="numeric" [ngModel]="draft().proteinTarget" (ngModelChange)="patch('proteinTarget', $event)" />
+    </div>
+    <div class="field">
+      <label for="carb">Glucides (g)</label>
+      <input id="carb" type="number" inputmode="numeric" [ngModel]="draft().carbsTarget" (ngModelChange)="patch('carbsTarget', $event)" />
+    </div>
+    <div class="field">
+      <label for="fat">Lipides (g)</label>
+      <input id="fat" type="number" inputmode="numeric" [ngModel]="draft().fatTarget" (ngModelChange)="patch('fatTarget', $event)" />
+    </div>
+    <div class="field">
+      <label for="start">Poids de départ (kg)</label>
+      <input id="start" type="number" inputmode="decimal" step="0.1" [ngModel]="draft().startWeightKg" (ngModelChange)="patch('startWeightKg', $event)" />
+    </div>
+    <div class="field">
+      <label for="goal">Poids objectif (kg)</label>
+      <input id="goal" type="number" inputmode="decimal" step="0.1" [ngModel]="draft().weightGoalKg" (ngModelChange)="patch('weightGoalKg', $event)" />
+    </div>
+  </div>
+  <button class="btn btn-primary full" (click)="save()">Enregistrer</button>
+</section>
+
+<section class="card">
+  <h2>Sauvegarde</h2>
+  <p class="muted hint">
+    Tout est stocké dans ce navigateur uniquement. Exporte régulièrement pour ne rien perdre.
+  </p>
+  <button class="btn full" (click)="exportJson()">Exporter en JSON</button>
+  <label class="btn full import">
+    Importer un JSON
+    <input type="file" accept="application/json,.json" (change)="importJson($event)" />
+  </label>
+</section>
+
+<section class="card">
+  <h2>Zone rouge</h2>
+  <button class="btn btn-danger full" (click)="reset()">Réinitialiser toutes les données</button>
+</section>

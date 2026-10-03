@@ -1,0 +1,43 @@
+h1 {
+  margin-bottom: 12px;
+}
+
+.card {
+  margin-bottom: 14px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .muted {
+    font-size: 0.72rem;
+  }
+
+  strong {
+    font-size: 1.05rem;
+  }
+}
+
+.chart {
+  height: 220px;
+  margin-top: 10px;
+}
+
+.legend {
+  font-size: 0.72rem;
+  margin: 8px 0 0;
+}
+
+.projection {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}

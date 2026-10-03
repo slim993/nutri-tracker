@@ -1,0 +1,53 @@
+@use '../shared/sheet';
+
+.card {
+  margin-bottom: 14px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .muted {
+    font-size: 0.72rem;
+  }
+
+  strong {
+    font-size: 1.1rem;
+  }
+
+  .good {
+    color: var(--accent);
+  }
+}
+
+.chart {
+  height: 230px;
+  margin-top: 10px;
+}
+
+.legend {
+  font-size: 0.72rem;
+  margin: 8px 0 0;
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 90px auto;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.del {
+  width: 40px;
+  height: 40px;
+  color: var(--text-dim);
+}

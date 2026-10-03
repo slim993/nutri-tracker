@@ -1,0 +1,9 @@
+@use '../shared/sheet';
+
+.star {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  font-size: 1.15rem;
+  color: var(--kcal);
+}

@@ -1,0 +1,51 @@
+@use '../shared/sheet';
+
+.hint {
+  font-size: 0.82rem;
+  margin: -6px 0 0;
+}
+
+.items {
+  margin-bottom: 12px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+
+  .item-name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .muted {
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+
+  .del {
+    width: 32px;
+    color: var(--text-dim);
+  }
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 84px auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+
+  select {
+    min-width: 0;
+  }
+}
+
+.totals {
+  font-size: 0.88rem;
+  margin: 0 0 16px;
+}

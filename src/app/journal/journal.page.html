@@ -1,0 +1,67 @@
+<header class="day">
+  <button class="nav" (click)="shift(-1)" aria-label="Jour précédent">‹</button>
+  <div class="date">
+    <h1>{{ prettyDate() }}</h1>
+    <input type="date" [ngModel]="date()" (ngModelChange)="date.set($event)" />
+  </div>
+  <button class="nav" (click)="shift(1)" aria-label="Jour suivant">›</button>
+</header>
+
+@if (!isToday()) {
+  <button class="btn today" (click)="today()">Revenir à aujourd'hui</button>
+}
+
+<section class="card">
+  <app-macro-progress [consumed]="totals()" [targets]="targets()" />
+</section>
+
+@for (group of groups(); track group.id) {
+  <section class="card group">
+    <div class="group-head">
+      <h2>{{ group.label }}</h2>
+      <span class="muted">{{ group.kcal | number: '1.0-0' }} kcal</span>
+    </div>
+    @for (item of group.entries; track item.entry.id) {
+      <div class="entry">
+        <button class="entry-main" (click)="startEdit(item)">
+          <span class="name">{{ item.foodName }}</span>
+          <span class="muted">
+            {{ item.entry.grams }} g · {{ item.macros.kcal | number: '1.0-0' }} kcal ·
+            P {{ item.macros.protein | number: '1.0-0' }}
+          </span>
+        </button>
+        <button class="del" (click)="remove(item.entry.id)" aria-label="Supprimer">✕</button>
+      </div>
+    }
+  </section>
+} @empty {
+  <p class="empty">Rien de logué ce jour. Appuie sur « + » pour commencer.</p>
+}
+
+<button class="fab" (click)="sheetSlot.set('other')" aria-label="Ajouter">+</button>
+
+@if (sheetSlot(); as slot) {
+  <app-add-sheet [date]="date()" [initialSlot]="slot" (closed)="sheetSlot.set(null)" />
+}
+
+@if (editing(); as item) {
+  <div class="backdrop" (click)="editing.set(null)"></div>
+  <div class="edit-sheet">
+    <h2>{{ item.foodName }}</h2>
+    <div class="field">
+      <label for="edit-grams">Quantité (g)</label>
+      <input
+        id="edit-grams"
+        type="number"
+        inputmode="numeric"
+        min="1"
+        [ngModel]="editGrams()"
+        (ngModelChange)="editGrams.set($event)"
+      />
+    </div>
+    <div class="row">
+      <button class="btn btn-danger" (click)="remove(item.entry.id)">Supprimer</button>
+      <button class="btn btn-primary" style="flex: 1" (click)="saveEdit()">Enregistrer</button>
+    </div>
+  </div>
+}
