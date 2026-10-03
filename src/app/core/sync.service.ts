@@ -25,14 +25,17 @@ const PAGE_SIZE = 1000;
 const PUSH_CHUNK = 500;
 const DEBOUNCE_MS = 2000;
 
+/** French messages for the Supabase auth error codes a user can actually trigger. */
 const AUTH_MESSAGES: Record<string, string> = {
-  'Invalid login credentials': 'E-mail ou mot de passe incorrect.',
-  'Email not confirmed': 'Confirme d’abord ton e-mail avec le lien reçu.',
-  'User already registered': 'Un compte existe déjà avec cet e-mail.',
+  otp_expired: 'Code incorrect ou expiré. Demande un nouveau code.',
+  over_email_send_rate_limit: 'Trop de codes demandés. Réessaie dans quelques minutes.',
+  over_request_rate_limit: 'Trop de tentatives. Réessaie dans quelques minutes.',
+  email_address_invalid: 'Cette adresse e-mail n’est pas valide.',
+  validation_failed: 'Cette adresse e-mail n’est pas valide.',
 };
 
-function authError(message: string): Error {
-  return new Error(AUTH_MESSAGES[message] ?? `Connexion impossible : ${message}`);
+function authError(error: { code?: string; message: string }): Error {
+  return new Error(AUTH_MESSAGES[error.code ?? ''] ?? `Connexion impossible : ${error.message}`);
 }
 
 /**
@@ -106,27 +109,22 @@ export class SyncService {
     }
   }
 
-  async signIn(email: string, password: string): Promise<void> {
+  /**
+   * E-mails a one-time code. There is no password and no separate sign-up: an
+   * unknown address gets an account when its first code is verified.
+   */
+  async sendCode(email: string): Promise<void> {
     const client = await this.client();
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
-    if (error) throw authError(error.message);
-    this.setUser(data.user);
-    await this.syncNow();
+    const { error } = await client.auth.signInWithOtp({ email });
+    if (error) throw authError(error);
   }
 
-  /** Returns false when the account still needs its e-mail confirmed before signing in. */
-  async signUp(email: string, password: string): Promise<boolean> {
+  async verifyCode(email: string, code: string): Promise<void> {
     const client = await this.client();
-    const { data, error } = await client.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: document.baseURI },
-    });
-    if (error) throw authError(error.message);
-    if (!data.session) return false;
+    const { data, error } = await client.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (error) throw authError(error);
     this.setUser(data.user);
     await this.syncNow();
-    return true;
   }
 
   /** Local data stays on the device; it just stops syncing. */

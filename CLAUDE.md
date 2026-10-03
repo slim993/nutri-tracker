@@ -84,6 +84,10 @@ and on tab focus.
 - First sync of an account on a device: local data is uploaded only if it belongs to no account
   and the account is empty; otherwise the account's data replaces it, after confirmation
   (`needsReplace`) unless the welcome form was never completed.
+- Sign-in is passwordless: `sendCode()` e-mails a one-time code, `verifyCode()` exchanges it for
+  a session, and an unknown address is created on first verification. This relies on the
+  Supabase "Magic Link" and "Confirm signup" e-mail templates containing `{{ .Token }}`; with
+  the default templates the e-mail only carries a link, which the app does not handle.
 - `supabase.config.ts` holds the project URL and anon key (public by design). Empty values mean
   local-only: `SyncService.available` is false and `shared/account-panel.ts` renders nothing.
 - `@supabase/supabase-js` and `SyncService` are loaded with dynamic `import()` to stay out of

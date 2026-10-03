@@ -58,7 +58,9 @@ La synchronisation passe par un projet [Supabase](https://supabase.com) :
 
 1. Créer un projet Supabase, puis exécuter `supabase/schema.sql` dans son éditeur SQL.
 2. Dans **Authentication → URL Configuration**, mettre l'URL du site en « Site URL ».
-3. Renseigner l'URL du projet et la clé `anon` dans `src/app/core/supabase.config.ts`.
+3. Dans **Authentication → Emails**, ajouter `{{ .Token }}` aux modèles « Magic Link » et
+   « Confirm signup » : la connexion se fait par code reçu par e-mail, sans mot de passe.
+4. Renseigner l'URL du projet et la clé `anon` dans `src/app/core/supabase.config.ts`.
 
 Tant que ce fichier est vide, l'app reste 100 % locale et n'affiche aucune interface de compte.
 Chaque utilisateur ne peut lire et écrire que ses propres lignes (row-level security). En cas de

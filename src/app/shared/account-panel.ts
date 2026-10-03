@@ -62,32 +62,40 @@ import { SyncService } from '../core/sync.service';
             Connecte-toi pour retrouver tes données sur tous tes appareils. Sans compte, tout reste
             sur cet appareil.
           </p>
-          <div class="field">
-            <label for="account-email">E-mail</label>
-            <input
-              id="account-email"
-              type="email"
-              autocomplete="email"
-              [ngModel]="emailInput()"
-              (ngModelChange)="emailInput.set($event)"
-            />
-          </div>
-          <div class="field">
-            <label for="account-password">Mot de passe</label>
-            <input
-              id="account-password"
-              type="password"
-              autocomplete="current-password"
-              [ngModel]="password()"
-              (ngModelChange)="password.set($event)"
-            />
-          </div>
-          <button class="btn btn-primary full" [disabled]="!canSubmit()" (click)="signIn()">
-            Se connecter
-          </button>
-          <button class="btn full" [disabled]="!canSubmit()" (click)="signUp()">
-            Créer un compte
-          </button>
+          @if (codeSentTo(); as sentTo) {
+            <p class="hint">Code envoyé à {{ sentTo }}. Il reste valable une heure.</p>
+            <div class="field">
+              <label for="account-code">Code reçu par e-mail</label>
+              <input
+                id="account-code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                [ngModel]="code()"
+                (ngModelChange)="code.set($event)"
+              />
+            </div>
+            <button class="btn btn-primary full" [disabled]="!canVerify()" (click)="verify()">
+              Valider le code
+            </button>
+            <button class="btn full" [disabled]="busy()" (click)="changeEmail()">
+              Changer d'e-mail
+            </button>
+          } @else {
+            <div class="field">
+              <label for="account-email">E-mail</label>
+              <input
+                id="account-email"
+                type="email"
+                autocomplete="email"
+                [ngModel]="emailInput()"
+                (ngModelChange)="emailInput.set($event)"
+              />
+            </div>
+            <button class="btn btn-primary full" [disabled]="!canSend()" (click)="sendCode()">
+              Recevoir un code
+            </button>
+          }
         }
       </section>
     }
@@ -136,30 +144,44 @@ export class AccountPanel {
   protected readonly sync = inject(SyncService);
 
   protected readonly emailInput = signal('');
-  protected readonly password = signal('');
+  protected readonly code = signal('');
+  /** Address the pending code was sent to; null while still asking for the e-mail. */
+  protected readonly codeSentTo = signal<string | null>(null);
   protected readonly busy = signal(false);
   protected readonly flash = signal<{ ok: boolean; text: string } | null>(null);
 
-  protected canSubmit(): boolean {
-    return !this.busy() && this.emailInput().trim() !== '' && this.password().length >= 6;
+  protected canSend(): boolean {
+    return !this.busy() && this.emailInput().trim().includes('@');
   }
 
-  protected signIn(): Promise<void> {
+  protected canVerify(): boolean {
+    return !this.busy() && this.code().trim().length >= 6;
+  }
+
+  /** Same step for a new and an existing account: the first code creates it. */
+  protected sendCode(): Promise<void> {
     return this.run(async () => {
-      await this.sync.signIn(this.emailInput().trim(), this.password());
-      this.password.set('');
+      const email = this.emailInput().trim();
+      await this.sync.sendCode(email);
+      this.code.set('');
+      this.codeSentTo.set(email);
       return null;
     });
   }
 
-  protected signUp(): Promise<void> {
+  protected verify(): Promise<void> {
     return this.run(async () => {
-      const signedIn = await this.sync.signUp(this.emailInput().trim(), this.password());
-      this.password.set('');
-      return signedIn
-        ? 'Compte créé.'
-        : 'Compte créé. Confirme ton e-mail avec le lien reçu, puis connecte-toi.';
+      await this.sync.verifyCode(this.codeSentTo() ?? '', this.code().trim());
+      this.code.set('');
+      this.codeSentTo.set(null);
+      return null;
     });
+  }
+
+  protected changeEmail(): void {
+    this.flash.set(null);
+    this.code.set('');
+    this.codeSentTo.set(null);
   }
 
   protected signOut(): Promise<void> {
