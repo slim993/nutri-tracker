@@ -5,7 +5,7 @@ import type { ChartConfiguration } from 'chart.js';
 import { LogService } from '../core/log.service';
 import { SettingsService } from '../core/settings.service';
 import { WeightService } from '../core/weight.service';
-import { fromDateKey, toDateKey } from '../core/models';
+import { daysToGoal, fromDateKey, toDateKey } from '../core/models';
 import { BAR_CHART_OPTIONS, LINE_CHART_OPTIONS } from '../shared/chart-defaults';
 import { LOCALE, t } from '../core/i18n';
 
@@ -136,32 +136,32 @@ export class StatsPage {
     };
   });
 
-  protected readonly totalLoss = computed(() => {
+  /** Change between the first and the latest weigh-in — negative when weight was lost. */
+  protected readonly totalChange = computed(() => {
     const first = this.weight.first();
     const last = this.weight.latest();
     if (!first || !last) return 0;
-    return first.weightKg - last.weightKg;
+    return last.weightKg - first.weightKg;
   });
 
-  /** Average kg lost per week over the whole weigh-in history. */
+  /** Average kg per week over the whole weigh-in history, signed like `totalChange`. */
   protected readonly weeklyRate = computed(() => {
     const first = this.weight.first();
     const last = this.weight.latest();
     if (!first || !last || first.id === last.id) return 0;
     const weeks =
       (fromDateKey(last.date).getTime() - fromDateKey(first.date).getTime()) / MS_PER_WEEK;
-    return weeks > 0 ? this.totalLoss() / weeks : 0;
+    return weeks > 0 ? this.totalChange() / weeks : 0;
   });
 
   /** Projected goal date at the current rate, or null when it is not on track. */
   protected readonly projection = computed(() => {
     const last = this.weight.latest();
-    const rate = this.weeklyRate();
-    if (!last || rate <= 0) return null;
-    const remaining = last.weightKg - this.settings().weightGoalKg;
-    if (remaining <= 0) return null;
+    if (!last) return null;
+    const days = daysToGoal(last.weightKg, this.settings().weightGoalKg, this.weeklyRate());
+    if (!days) return null;
     const date = fromDateKey(last.date);
-    date.setDate(date.getDate() + Math.ceil((remaining / rate) * 7));
+    date.setDate(date.getDate() + days);
     return date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
   });
 

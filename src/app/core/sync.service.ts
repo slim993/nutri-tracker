@@ -26,6 +26,22 @@ const PAGE_SIZE = 1000;
 const PUSH_CHUNK = 500;
 const DEBOUNCE_MS = 2000;
 
+/**
+ * PostgREST `or` filter selecting the rows that sort after `row` in
+ * (updated_at, store, id) order — the order `pull()` reads in.
+ */
+function rowsAfter(row: { updated_at: string; store: string; id: string }): string {
+  // Values are double-quoted: timestamps and ids contain characters the filter syntax reserves.
+  const quote = (value: string) => `"${value.replace(/[\\"]/g, '\\$&')}"`;
+  const at = quote(row.updated_at);
+  const store = quote(row.store);
+  return [
+    `updated_at.gt.${at}`,
+    `and(updated_at.eq.${at},store.gt.${store})`,
+    `and(updated_at.eq.${at},store.eq.${store},id.gt.${quote(row.id)})`,
+  ].join(',');
+}
+
 /** French messages for the Supabase auth error codes a user can actually trigger. */
 const AUTH_MESSAGES: Record<string, string> = {
   otp_expired: t('Code incorrect ou expiré. Demande un nouveau code.'),
@@ -263,6 +279,15 @@ export class SyncService {
       ]);
     }
 
+    // Reload before pushing: if the push below fails, the screens must still show what was just
+    // written to IndexedDB — the next round would find nothing left to apply and never reload.
+    if (wiped || plan.apply.length > 0) {
+      // A brand-new account has no catalogue yet: give it the starter foods and meals. They are
+      // pushed by the round the reload triggers.
+      if (wiped) await seedIfEmpty();
+      await this.data.reloadAll();
+    }
+
     for (let i = 0; i < plan.push.length; i += PUSH_CHUNK) {
       const chunk = plan.push.slice(i, i + PUSH_CHUNK);
       const { error } = await client.from('records').upsert(
@@ -289,12 +314,6 @@ export class SyncService {
     }
 
     await db.put('syncMeta', { ...meta, cursor });
-
-    if (wiped || plan.apply.length > 0) {
-      // A brand-new account has no catalogue yet: give it the starter foods and meals.
-      if (wiped) await seedIfEmpty();
-      await this.data.reloadAll();
-    }
     return true;
   }
 
@@ -304,22 +323,31 @@ export class SyncService {
     userId: string,
     cursor: string | null,
   ): Promise<(RemoteRow & { updated_at: string })[]> {
-    const rows: (RemoteRow & { updated_at: string })[] = [];
-    for (let from = 0; ; from += PAGE_SIZE) {
+    type Row = RemoteRow & { updated_at: string };
+    const rows: Row[] = [];
+    let last: Row | undefined;
+    for (;;) {
       let query = client
         .from('records')
         .select('store,id,data,deleted,updated_at')
         .eq('user_id', userId);
-      // `gte`, not `gt`: rows written in the same instant as the cursor row must not be skipped.
-      if (cursor) query = query.gte('updated_at', cursor);
+      if (last) {
+        // Keyset pagination: continue strictly after the last row seen. Offsets would skip a
+        // row whenever another device writes during the pull and shifts the ordering.
+        query = query.or(rowsAfter(last));
+      } else if (cursor) {
+        // `gte`, not `gt`: rows written in the same instant as the cursor row must not be skipped.
+        query = query.gte('updated_at', cursor);
+      }
       const { data, error } = await query
         .order('updated_at')
         .order('store')
         .order('id')
-        .range(from, from + PAGE_SIZE - 1);
+        .limit(PAGE_SIZE);
       if (error) throw error;
-      rows.push(...(data as (RemoteRow & { updated_at: string })[]));
+      rows.push(...(data as Row[]));
       if (data.length < PAGE_SIZE) return rows;
+      last = rows.at(-1);
     }
   }
 }

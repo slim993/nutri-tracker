@@ -101,6 +101,21 @@ export function weightGoalLabel(currentKg: number, goalKg: number): string {
   return t('maintien du poids');
 }
 
+/**
+ * Days until `goalKg` at `weeklyChangeKg` (negative when losing), whichever
+ * way the goal lies. Null when already there or when the weight is moving
+ * away from the goal (or not moving).
+ */
+export function daysToGoal(
+  currentKg: number,
+  goalKg: number,
+  weeklyChangeKg: number,
+): number | null {
+  const remaining = goalKg - currentKg;
+  if (remaining === 0 || remaining * weeklyChangeKg <= 0) return null;
+  return Math.ceil((remaining / weeklyChangeKg) * 7);
+}
+
 export const EMPTY_MACROS: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
 
 /** Scales a food's per-100 g values to the given amount in grams. */

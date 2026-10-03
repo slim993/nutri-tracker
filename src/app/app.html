@@ -14,8 +14,12 @@
         </a>
       }
     </nav>
-  } @else {
-    <!-- Deferred so the form code stays out of the initial bundle for returning users. -->
+  } @else if (!data.error()) {
+    <!--
+      Not shown when the local data failed to load: "no settings" then means "unknown", and
+      submitting the form could overwrite an existing user's targets.
+      Deferred so the form code stays out of the initial bundle for returning users.
+    -->
     @defer {
       <app-welcome />
     }

@@ -2,12 +2,15 @@
 
 <section class="card summary">
   <div>
-    <span class="muted">{{ t('Perte totale') }}</span>
-    <strong>{{ totalLoss() | number: '1.1-1' }} kg</strong>
+    <span class="muted">{{ t('Variation totale') }}</span>
+    <strong>{{ totalChange() > 0 ? '+' : '' }}{{ totalChange() | number: '1.1-1' }} kg</strong>
   </div>
   <div>
     <span class="muted">{{ t('Rythme') }}</span>
-    <strong>{{ weeklyRate() | number: '1.2-2' }} {{ t('kg/sem.') }}</strong>
+    <strong
+      >{{ weeklyRate() > 0 ? '+' : '' }}{{ weeklyRate() | number: '1.2-2' }}
+      {{ t('kg/sem.') }}</strong
+    >
   </div>
   <div>
     <span class="muted">{{ t('Adhérence prot.') }}</span>

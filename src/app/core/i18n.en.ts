@@ -109,7 +109,7 @@ export const EN: Record<string, string> = {
   Objectif: 'Goal',
 
   // --- Stats ---
-  'Perte totale': 'Total loss',
+  'Variation totale': 'Total change',
   Rythme: 'Pace',
   'kg/sem.': 'kg/wk',
   'Adhérence prot.': 'Protein days',

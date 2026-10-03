@@ -1,8 +1,32 @@
 import { describe, expect, it, vi } from 'vitest';
-import { macrosFor, shiftDateKey, sumMacros, toDateKey, weightGoalLabel } from './models';
+import {
+  daysToGoal,
+  macrosFor,
+  shiftDateKey,
+  sumMacros,
+  toDateKey,
+  weightGoalLabel,
+} from './models';
 
 // These assertions read French text: pin the language before the modules under test load.
 vi.hoisted(() => localStorage.setItem('nutri-lang', 'fr'));
+
+describe('daysToGoal', () => {
+  it('projects a loss towards a lower goal', () => {
+    expect(daysToGoal(90, 85, -0.5)).toBe(70);
+  });
+
+  it('projects a gain towards a higher goal', () => {
+    expect(daysToGoal(60, 62, 0.25)).toBe(56);
+  });
+
+  it('is null when moving away from the goal, not moving, or already there', () => {
+    expect(daysToGoal(90, 85, 0.5)).toBeNull();
+    expect(daysToGoal(60, 62, -0.25)).toBeNull();
+    expect(daysToGoal(90, 85, 0)).toBeNull();
+    expect(daysToGoal(85, 85, -0.5)).toBeNull();
+  });
+});
 
 describe('weightGoalLabel', () => {
   it('follows the direction from current weight to goal', () => {
