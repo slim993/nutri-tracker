@@ -21,6 +21,14 @@ offline behaviour you must build and serve the output:
 npm run build && npx http-server dist/nutri-tracker/browser -p 8080
 ```
 
+## Deployment
+
+Hosted on GitHub Pages at https://slim993.github.io/nutri-tracker/, served from the `gh-pages`
+branch (no CI workflow). To redeploy: `npm run build:pages` (sets the `/nutri-tracker/` base
+href — do not pass `--base-href` from Git Bash, it rewrites the path), copy `index.html` to
+`404.html` in `dist/nutri-tracker/browser` (deep-link fallback), add an empty `.nojekyll`, then
+force-push that folder's contents as the single commit of `gh-pages`.
+
 ## Git
 
 **No AI signatures anywhere in git history.** Never add `Co-Authored-By: Claude …`,
