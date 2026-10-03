@@ -23,11 +23,11 @@ npm run build && npx http-server dist/nutri-tracker/browser -p 8080
 
 ## Deployment
 
-Hosted on GitHub Pages at https://slim993.github.io/nutri-tracker/, served from the `gh-pages`
-branch (no CI workflow). To redeploy: `npm run build:pages` (sets the `/nutri-tracker/` base
-href — do not pass `--base-href` from Git Bash, it rewrites the path), copy `index.html` to
-`404.html` in `dist/nutri-tracker/browser` (deep-link fallback), add an empty `.nojekyll`, then
-force-push that folder's contents as the single commit of `gh-pages`.
+Hosted on GitHub Pages at https://slim993.github.io/nutri-tracker/. Every push to `main` runs
+`.github/workflows/deploy.yml`: unit tests, then `npm run build:pages` (sets the
+`/nutri-tracker/` base href — do not pass `--base-href` from Git Bash, it rewrites the path),
+then a copy of `index.html` to `404.html` (deep-link fallback) and the Pages deploy. A failing
+test blocks the deploy.
 
 ## Git
 
