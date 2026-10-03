@@ -67,6 +67,10 @@ This is where the important invariants are; read it before touching a screen.
   a generic food/meal catalogue only — **no personal values ship with the app**. Weight, goal
   and targets come from `welcome/`, which `App` shows while `SettingsService.configured()` is
   false (no `settings` record yet).
+- `coach.ts` — pure, rule-based maths behind the welcome questionnaire: `computeTargets()`
+  (Mifflin-St Jeor × activity factor, pace-based deficit, a calorie floor it never goes under)
+  and `buildProgram()` (four weeks of sessions for `WorkoutsService.createMany()`). No AI and no
+  network; covered by `coach.spec.ts`. The answers themselves are not stored.
 
 ### Account sync (`core/sync.service.ts`, Supabase)
 
@@ -124,5 +128,5 @@ around the fenced JSON block; it is covered by `claude-bridge.service.spec.ts`.
 
 ### Testing
 
-Only pure helpers are covered (`core/models.spec.ts`, `core/sync-plan.spec.ts`) — services need a real IndexedDB, so keep
+Only pure helpers are covered (`core/models.spec.ts`, `core/sync-plan.spec.ts`, `core/coach.spec.ts`) — services need a real IndexedDB, so keep
 non-trivial logic in pure functions in `models.ts` where it can be tested directly.

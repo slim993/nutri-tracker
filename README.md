@@ -44,8 +44,9 @@ npx http-server dist/nutri-tracker/browser -p 8080
 
 ## Données
 
-Au premier lancement, un écran de bienvenue demande le poids actuel, le poids objectif et les
-cibles quotidiennes : aucune valeur personnelle n'est livrée avec l'app. Seul un catalogue de
+Au premier lancement, un questionnaire (sexe, âge, taille, poids, objectif, activité,
+entraînement) calcule des cibles quotidiennes et propose un programme de 4 semaines, tous deux
+modifiables avant de commencer : aucune valeur personnelle n'est livrée avec l'app. Seul un catalogue de
 départ (13 aliments, 5 repas types) est pré-rempli ; il ne se rejoue jamais tant qu'un aliment
 existe.
 

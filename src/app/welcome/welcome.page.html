@@ -1,84 +1,251 @@
 <h1>Bienvenue 👋</h1>
-<p class="muted intro">
-  Quelques informations pour démarrer. Tout est modifiable ensuite dans les réglages.
-</p>
 
 @if (error(); as e) {
   <p class="flash ko">{{ e }}</p>
 }
 
-<section class="card">
-  <h2>Ton poids</h2>
-  <div class="grid">
-    <div class="field">
-      <label for="w-current">Poids actuel (kg)</label>
-      <input
-        id="w-current"
-        type="number"
-        inputmode="decimal"
-        step="0.1"
-        [ngModel]="currentKg()"
-        (ngModelChange)="currentKg.set($event)"
-      />
-    </div>
-    <div class="field">
-      <label for="w-goal">Poids objectif (kg)</label>
-      <input
-        id="w-goal"
-        type="number"
-        inputmode="decimal"
-        step="0.1"
-        [ngModel]="goalKg()"
-        (ngModelChange)="goalKg.set($event)"
-      />
-    </div>
-  </div>
+@if (step() === 'questions') {
+  <p class="muted intro">
+    Réponds à quelques questions : on calcule tes cibles et un programme de
+    {{ programWeeks }} semaines. Tout reste modifiable ensuite.
+  </p>
 
-  <h2>Tes cibles quotidiennes</h2>
-  <p class="muted hint">Valeurs indicatives : ajuste-les à ton objectif.</p>
-  <div class="grid">
-    <div class="field">
-      <label for="w-kcal">Calories</label>
-      <input
-        id="w-kcal"
-        type="number"
-        inputmode="numeric"
-        [ngModel]="kcal()"
-        (ngModelChange)="kcal.set($event)"
-      />
+  <section class="card">
+    <h2>Toi</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="w-sex">Sexe</label>
+        <select id="w-sex" [ngModel]="sex()" (ngModelChange)="sex.set($event)">
+          <option value="male">Homme</option>
+          <option value="female">Femme</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="w-age">Âge</label>
+        <input
+          id="w-age"
+          type="number"
+          inputmode="numeric"
+          [ngModel]="age()"
+          (ngModelChange)="age.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="w-height">Taille (cm)</label>
+        <input
+          id="w-height"
+          type="number"
+          inputmode="numeric"
+          [ngModel]="heightCm()"
+          (ngModelChange)="heightCm.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="w-current">Poids actuel (kg)</label>
+        <input
+          id="w-current"
+          type="number"
+          inputmode="decimal"
+          step="0.1"
+          [ngModel]="currentKg()"
+          (ngModelChange)="currentKg.set($event)"
+        />
+      </div>
     </div>
     <div class="field">
-      <label for="w-prot">Protéines (g)</label>
-      <input
-        id="w-prot"
-        type="number"
-        inputmode="numeric"
-        [ngModel]="protein()"
-        (ngModelChange)="protein.set($event)"
-      />
+      <label for="w-activity">Activité au quotidien (hors sport)</label>
+      <select id="w-activity" [ngModel]="activity()" (ngModelChange)="activity.set($event)">
+        @for (a of activityLevels; track a.id) {
+          <option [value]="a.id">{{ a.label }}</option>
+        }
+      </select>
+    </div>
+
+    <h2>Ton objectif</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="w-goal">Poids objectif (kg)</label>
+        <input
+          id="w-goal"
+          type="number"
+          inputmode="decimal"
+          step="0.1"
+          [ngModel]="goalKg()"
+          (ngModelChange)="goalKg.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="w-pace">Rythme</label>
+        <select id="w-pace" [ngModel]="pace()" (ngModelChange)="pace.set($event)">
+          @for (p of paces; track p.id) {
+            <option [value]="p.id">{{ p.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <h2>Ton entraînement</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="w-sessions">Séances par semaine</label>
+        <select
+          id="w-sessions"
+          [ngModel]="sessionsPerWeek()"
+          (ngModelChange)="sessionsPerWeek.set($event)"
+        >
+          <option [ngValue]="2">2</option>
+          <option [ngValue]="3">3</option>
+          <option [ngValue]="4">4</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="w-level">Niveau</label>
+        <select id="w-level" [ngModel]="level()" (ngModelChange)="level.set($event)">
+          <option value="beginner">Débutant</option>
+          <option value="intermediate">Habitué</option>
+        </select>
+      </div>
     </div>
     <div class="field">
-      <label for="w-carb">Glucides (g)</label>
-      <input
-        id="w-carb"
-        type="number"
-        inputmode="numeric"
-        [ngModel]="carbs()"
-        (ngModelChange)="carbs.set($event)"
-      />
+      <label for="w-equipment">Matériel</label>
+      <select id="w-equipment" [ngModel]="equipment()" (ngModelChange)="equipment.set($event)">
+        <option value="gym">Salle de sport</option>
+        <option value="none">Aucun (poids du corps)</option>
+      </select>
     </div>
-    <div class="field">
-      <label for="w-fat">Lipides (g)</label>
-      <input
-        id="w-fat"
-        type="number"
-        inputmode="numeric"
-        [ngModel]="fat()"
-        (ngModelChange)="fat.set($event)"
-      />
+
+    <button class="btn btn-primary full" [disabled]="!canCompute()" (click)="compute()">
+      Calculer mon programme
+    </button>
+    <button class="btn full" (click)="skip()">Je connais déjà mes cibles</button>
+  </section>
+
+  <app-account-panel />
+} @else {
+  @if (plan(); as p) {
+    <section class="card">
+      <h2>Ton plan</h2>
+      <p class="hint">
+        Ton maintien est estimé à {{ p.targets.maintenanceKcal }} kcal par jour.
+        @if (p.targets.weeklyChangeKg !== 0) {
+          Avec {{ p.targets.kcal }} kcal, tu vises environ
+          {{ p.targets.weeklyChangeKg | number: '1.1-2' }} kg par semaine.
+          @if (p.weeks) {
+            À ce rythme, {{ goalKg() }} kg dans {{ p.weeks }} semaines environ.
+          }
+        } @else {
+          Tes cibles sont réglées pour garder ton poids.
+        }
+      </p>
+      <p class="muted hint">
+        Estimation indicative, pas un avis médical : ajuste selon ta pesée au fil des semaines et
+        demande conseil à un professionnel de santé en cas de doute.
+      </p>
+    </section>
+  } @else {
+    <section class="card">
+      <h2>Ton poids</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="w-current">Poids actuel (kg)</label>
+          <input
+            id="w-current"
+            type="number"
+            inputmode="decimal"
+            step="0.1"
+            [ngModel]="currentKg()"
+            (ngModelChange)="currentKg.set($event)"
+          />
+        </div>
+        <div class="field">
+          <label for="w-goal">Poids objectif (kg)</label>
+          <input
+            id="w-goal"
+            type="number"
+            inputmode="decimal"
+            step="0.1"
+            [ngModel]="goalKg()"
+            (ngModelChange)="goalKg.set($event)"
+          />
+        </div>
+      </div>
+    </section>
+  }
+
+  <section class="card">
+    <h2>Tes cibles quotidiennes</h2>
+    <p class="muted hint">
+      {{ plan() ? 'Calculées d’après tes réponses' : 'Valeurs indicatives' }} : ajuste-les si
+      besoin.
+    </p>
+    <div class="grid">
+      <div class="field">
+        <label for="w-kcal">Calories</label>
+        <input
+          id="w-kcal"
+          type="number"
+          inputmode="numeric"
+          [ngModel]="kcal()"
+          (ngModelChange)="kcal.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="w-prot">Protéines (g)</label>
+        <input
+          id="w-prot"
+          type="number"
+          inputmode="numeric"
+          [ngModel]="protein()"
+          (ngModelChange)="protein.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="w-carb">Glucides (g)</label>
+        <input
+          id="w-carb"
+          type="number"
+          inputmode="numeric"
+          [ngModel]="carbs()"
+          (ngModelChange)="carbs.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="w-fat">Lipides (g)</label>
+        <input
+          id="w-fat"
+          type="number"
+          inputmode="numeric"
+          [ngModel]="fat()"
+          (ngModelChange)="fat.set($event)"
+        />
+      </div>
     </div>
-  </div>
+  </section>
+
+  @if (plan()) {
+    <section class="card">
+      <h2>Ton programme de {{ programWeeks }} semaines</h2>
+      <p class="muted hint">
+        {{ program().length }} séances à partir d'aujourd'hui. Voici la première semaine ; les
+        suivantes reprennent le même schéma avec plus de séries.
+      </p>
+      @for (session of firstWeek(); track session.date) {
+        <div class="session">
+          <strong>{{ dayLabel(session.date) }} — {{ session.name }}</strong>
+          <ul>
+            @for (exercise of session.exercises; track exercise.name) {
+              <li>{{ exercise.name }} : {{ exercise.sets }} × {{ exercise.reps }}</li>
+            }
+          </ul>
+        </div>
+      }
+      <label class="check">
+        <input type="checkbox" [ngModel]="addProgram()" (ngModelChange)="addProgram.set($event)" />
+        Ajouter ce programme à l'onglet Sport
+      </label>
+    </section>
+  }
+
   <button class="btn btn-primary full" [disabled]="!canStart()" (click)="start()">Commencer</button>
-</section>
-
-<app-account-panel />
+  <button class="btn full" [disabled]="busy()" (click)="step.set('questions')">Retour</button>
+}

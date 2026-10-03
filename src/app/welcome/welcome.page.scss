@@ -35,6 +35,33 @@ h1 {
 
 .full {
   width: 100%;
+
+  & + .full {
+    margin-top: 10px;
+  }
+}
+
+.session {
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+
+  ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+    color: var(--text-dim);
+  }
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+
+  input {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .flash {
