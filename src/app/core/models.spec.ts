@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { macrosFor, shiftDateKey, sumMacros, toDateKey } from './models';
+import { macrosFor, shiftDateKey, sumMacros, toDateKey, weightGoalLabel } from './models';
+
+describe('weightGoalLabel', () => {
+  it('follows the direction from current weight to goal', () => {
+    expect(weightGoalLabel(90, 80)).toContain('perte');
+    expect(weightGoalLabel(60, 68)).toContain('prise');
+    expect(weightGoalLabel(70, 70)).toContain('maintien');
+  });
+});
 
 describe('macrosFor', () => {
   it('scales per-100 g values to the logged amount', () => {

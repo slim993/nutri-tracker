@@ -37,8 +37,9 @@ descriptions, tags or release notes. Commits are authored by the repo owner only
 
 ## Architecture
 
-Angular 22 standalone PWA, French UI / English code, **no backend and no network calls at
-runtime**. Everything lives in the browser's IndexedDB.
+Angular 22 standalone PWA, French UI / English code, **local-first**: the app reads and writes
+the browser's IndexedDB only. The single network dependency is the optional Supabase account
+sync (see below); with no signed-in user the app makes no network calls at all.
 
 ### Data layer (`src/app/core/`)
 
@@ -47,8 +48,11 @@ This is where the important invariants are; read it before touching a screen.
 - `db.ts` — single memoized `getDb()` opening one IndexedDB database with six stores
   (`foods`, `meals`, `logEntries`, `weightEntries`, `settings`, `workouts`). Adding or changing a
   store means bumping `DB_VERSION` and extending `upgrade()` (the `contains()` guards make it
-  re-runnable), plus wiring the store into `DataService` export/import/reset. Wrap raw idb calls in `dbTry()` so failures
-  surface as a `DbError` carrying a French, user-presentable message.
+  re-runnable), plus wiring the store into `DataService` export/import/reset and into
+  `SYNC_STORES` (`sync-plan.ts`) and the `store` check in `supabase/schema.sql`. Two more stores,
+  `syncShadow` and `syncMeta`, are sync bookkeeping: never exported, imported or reset. Wrap raw
+  idb calls in `dbTry()` so failures surface as a `DbError` carrying a French, user-presentable
+  message.
 - One service per store (`FoodsService`, `MealsService`, `LogService`, `WeightService`,
   `SettingsService`). **Each holds the whole store in a signal**: `load()` reads it once at
   startup, and every mutation writes to IndexedDB *then* updates the signal. Components read
@@ -59,11 +63,35 @@ This is where the important invariants are; read it before touching a screen.
   which `App` uses to gate the whole UI. It also owns whole-database export/import/reset, since
   those cross every store in one transaction.
 - `seed.ts` runs only when the `foods` store is empty, so it never fights user data or replays
-  after an import. `reset()` deliberately re-seeds rather than leaving an empty app.
+  after an import. `reset()` deliberately re-seeds rather than leaving an empty app. The seed is
+  a generic food/meal catalogue only — **no personal values ship with the app**. Weight, goal
+  and targets come from `welcome/`, which `App` shows while `SettingsService.configured()` is
+  false (no `settings` record yet).
+
+### Account sync (`core/sync.service.ts`, Supabase)
+
+Optional and layered on top: IndexedDB stays the only thing screens read. Store services are not
+instrumented — `SyncService` diffs every record against its `syncShadow` copy (the record as last
+known to match the server), so import and reset sync too. One round is pull → `planSync()` →
+write local → push, triggered by an `effect()` on the store signals (debounced), on reconnect
+and on tab focus.
+
+- The merge rules live in the pure `planSync()` (`sync-plan.ts`, covered by its spec): an unsent
+  local change beats a remote change to the same record; deletions travel as tombstones.
+- Server side is one generic table, `records (user_id, store, id, data jsonb, deleted,
+  updated_at)`, with row-level security per user — see `supabase/schema.sql`. The server clock
+  stamps `updated_at`; the pull cursor is that timestamp.
+- First sync of an account on a device: local data is uploaded only if it belongs to no account
+  and the account is empty; otherwise the account's data replaces it, after confirmation
+  (`needsReplace`) unless the welcome form was never completed.
+- `supabase.config.ts` holds the project URL and anon key (public by design). Empty values mean
+  local-only: `SyncService.available` is false and `shared/account-panel.ts` renders nothing.
+- `@supabase/supabase-js` and `SyncService` are loaded with dynamic `import()` to stay out of
+  the initial bundle; keep it that way.
 
 ### Claude integration = copy/paste bridge, not API
 
-A deliberate decision: the app stays 100% local with **no Anthropic API key and no backend**.
+A deliberate decision: **no Anthropic API key and no AI backend**.
 `core/claude-bridge.service.ts` builds a context prompt (targets, weights, history) the user
 copies into the Claude app, and parses the JSON plan Claude returns (pasted back into the
 Entraînement screen). When adding AI-assisted features (e.g. weekly meal planning), extend this
@@ -92,5 +120,5 @@ around the fenced JSON block; it is covered by `claude-bridge.service.spec.ts`.
 
 ### Testing
 
-Only pure helpers are covered (`core/models.spec.ts`) — services need a real IndexedDB, so keep
+Only pure helpers are covered (`core/models.spec.ts`, `core/sync-plan.spec.ts`) — services need a real IndexedDB, so keep
 non-trivial logic in pure functions in `models.ts` where it can be tested directly.

@@ -9,6 +9,7 @@ import {
   MEAL_SLOTS,
   shiftDateKey,
   toDateKey,
+  weightGoalLabel,
   type LogEntry,
   type MealSlot,
   type Workout,
@@ -63,7 +64,7 @@ export class ClaudeBridgeService {
     return `Tu es mon coach sportif. Programme-moi les séances d'entraînement de la semaine à venir.
 
 ## Mon profil
-- Poids actuel : ${latest?.weightKg ?? s.startWeightKg} kg (départ ${s.startWeightKg} kg, objectif ${s.weightGoalKg} kg — perte de poids en préservant le muscle)
+- Poids actuel : ${latest?.weightKg ?? s.startWeightKg} kg (départ ${s.startWeightKg} kg, objectif ${s.weightGoalKg} kg — ${weightGoalLabel(latest?.weightKg ?? s.startWeightKg, s.weightGoalKg)})
 - Cibles nutrition quotidiennes : ${s.kcalTarget} kcal, ${s.proteinTarget} g protéines, ${s.carbsTarget} g glucides, ${s.fatTarget} g lipides
 
 ## Pesées récentes
@@ -175,7 +176,7 @@ Ce JSON sera importé tel quel dans mon application de suivi : n'invente pas d'a
     return `Tu es mon coach nutrition. Planifie tous mes repas des 7 prochains jours (à partir du ${today}).
 
 ## Mon profil
-- Poids actuel : ${latest?.weightKg ?? s.startWeightKg} kg, objectif ${s.weightGoalKg} kg (perte de poids en préservant le muscle)
+- Poids actuel : ${latest?.weightKg ?? s.startWeightKg} kg, objectif ${s.weightGoalKg} kg (${weightGoalLabel(latest?.weightKg ?? s.startWeightKg, s.weightGoalKg)})
 - Cibles quotidiennes : ${s.kcalTarget} kcal, ${s.proteinTarget} g protéines, ${s.carbsTarget} g glucides, ${s.fatTarget} g lipides
 
 ## Mes aliments (valeurs pour 100 g — réutilise ces noms EXACTS)

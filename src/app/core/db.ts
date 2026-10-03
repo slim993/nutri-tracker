@@ -8,10 +8,27 @@ export interface NutriDB extends DBSchema {
   weightEntries: { key: string; value: WeightEntry; indexes: { 'by-date': string } };
   settings: { key: string; value: Settings };
   workouts: { key: string; value: Workout; indexes: { 'by-date': string } };
+  /** Sync bookkeeping: each record as it was when last known to match the server. */
+  syncShadow: { key: string; value: SyncShadow };
+  syncMeta: { key: string; value: SyncMeta };
+}
+
+export interface SyncShadow {
+  /** `store:id` */
+  key: string;
+  json: string;
+}
+
+export interface SyncMeta {
+  id: 'meta';
+  /** Account this device's data belongs to; null until the first sign-in. */
+  userId: string | null;
+  /** Server timestamp of the last pulled row. */
+  cursor: string | null;
 }
 
 export const DB_NAME = 'nutri-tracker';
-export const DB_VERSION = 2; // v2: workouts store
+export const DB_VERSION = 3; // v2: workouts store, v3: sync bookkeeping
 
 /** Every store the app expects — used by the self-healing check below. */
 const EXPECTED_STORES = [
@@ -21,6 +38,8 @@ const EXPECTED_STORES = [
   'weightEntries',
   'settings',
   'workouts',
+  'syncShadow',
+  'syncMeta',
 ] as const;
 
 let dbPromise: Promise<IDBPDatabase<NutriDB>> | null = null;
@@ -46,6 +65,12 @@ function upgrade(db: IDBPDatabase<NutriDB>): void {
   if (!db.objectStoreNames.contains('workouts')) {
     const store = db.createObjectStore('workouts', { keyPath: 'id' });
     store.createIndex('by-date', 'date');
+  }
+  if (!db.objectStoreNames.contains('syncShadow')) {
+    db.createObjectStore('syncShadow', { keyPath: 'key' });
+  }
+  if (!db.objectStoreNames.contains('syncMeta')) {
+    db.createObjectStore('syncMeta', { keyPath: 'id' });
   }
 }
 

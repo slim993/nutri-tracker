@@ -4,10 +4,11 @@ import { DataService } from '../core/data.service';
 import { SettingsService } from '../core/settings.service';
 import { toDateKey } from '../core/models';
 import type { Settings } from '../core/models';
+import { AccountPanel } from '../shared/account-panel';
 
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule],
+  imports: [FormsModule, AccountPanel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',

@@ -89,6 +89,13 @@ export interface Settings {
   startWeightKg: number;
 }
 
+/** How the Claude prompts describe the user's aim, from where they are and where they want to be. */
+export function weightGoalLabel(currentKg: number, goalKg: number): string {
+  if (goalKg < currentKg) return 'perte de poids en préservant le muscle';
+  if (goalKg > currentKg) return 'prise de poids, surtout du muscle';
+  return 'maintien du poids';
+}
+
 export const EMPTY_MACROS: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
 
 /** Scales a food's per-100 g values to the given amount in grams. */

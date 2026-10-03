@@ -38,10 +38,13 @@
   <button class="btn btn-primary full" (click)="save()">Enregistrer</button>
 </section>
 
+<app-account-panel />
+
 <section class="card">
   <h2>Sauvegarde</h2>
   <p class="muted hint">
-    Tout est stocké dans ce navigateur uniquement. Exporte régulièrement pour ne rien perdre.
+    Sans compte connecté, tout est stocké dans ce navigateur uniquement. Exporte régulièrement
+    pour ne rien perdre.
   </p>
   <button class="btn full" (click)="exportJson()">Exporter en JSON</button>
   <label class="btn full import">

@@ -1,8 +1,8 @@
 # Nutri-Tracker
 
-PWA Angular de suivi nutritionnel et de poids, **100 % locale** : aucun backend, aucun compte,
-aucune requête réseau au runtime. Toutes les données vivent dans l'IndexedDB du navigateur et
-l'app fonctionne hors ligne une fois installée.
+PWA Angular de suivi nutritionnel et de poids, **locale d'abord** : toutes les données vivent dans
+l'IndexedDB du navigateur et l'app fonctionne hors ligne une fois installée. Un compte optionnel
+(Supabase) synchronise ces données entre appareils ; sans compte, rien ne quitte l'appareil.
 
 ## Fonctionnalités
 
@@ -14,7 +14,8 @@ l'app fonctionne hors ligne une fois installée.
   écarts depuis le départ et jusqu'à la cible.
 - **Stats** — kcal moyennes par semaine, adhérence à la cible protéines, moyenne mobile 7 jours
   du poids, rythme moyen (kg/semaine) et projection de la date d'atteinte de l'objectif.
-- **Réglages** — édition des cibles, export/import JSON, réinitialisation.
+- **Réglages** — édition des cibles, compte et synchronisation, export/import JSON,
+  réinitialisation.
 
 ## Commandes
 
@@ -43,12 +44,25 @@ npx http-server dist/nutri-tracker/browser -p 8080
 
 ## Données
 
-Au premier lancement, la base est pré-remplie : cibles (2300 kcal / 195 P / 215 G / 75 L),
-poids de départ 106,7 kg, objectif 85 kg, une première pesée à 97 kg, 13 aliments et 5 repas types.
-Le seed ne se rejoue jamais tant qu'un aliment existe.
+Au premier lancement, un écran de bienvenue demande le poids actuel, le poids objectif et les
+cibles quotidiennes : aucune valeur personnelle n'est livrée avec l'app. Seul un catalogue de
+départ (13 aliments, 5 repas types) est pré-rempli ; il ne se rejoue jamais tant qu'un aliment
+existe.
 
-⚠️ Les données sont dans **ce navigateur uniquement**. Vider les données de site ou désinstaller
-l'app les efface. Utilise **Réglages → Exporter en JSON** régulièrement comme sauvegarde.
+⚠️ Sans compte connecté, les données sont dans **ce navigateur uniquement**. Vider les données de
+site ou désinstaller l'app les efface. Utilise **Réglages → Exporter en JSON** comme sauvegarde.
+
+## Compte et synchronisation (optionnel)
+
+La synchronisation passe par un projet [Supabase](https://supabase.com) :
+
+1. Créer un projet Supabase, puis exécuter `supabase/schema.sql` dans son éditeur SQL.
+2. Dans **Authentication → URL Configuration**, mettre l'URL du site en « Site URL ».
+3. Renseigner l'URL du projet et la clé `anon` dans `src/app/core/supabase.config.ts`.
+
+Tant que ce fichier est vide, l'app reste 100 % locale et n'affiche aucune interface de compte.
+Chaque utilisateur ne peut lire et écrire que ses propres lignes (row-level security). En cas de
+modification du même élément sur deux appareils, la modification envoyée en dernier l'emporte.
 
 ## Architecture
 

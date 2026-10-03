@@ -62,13 +62,9 @@ Crée une **PWA Angular standalone** de suivi nutritionnel et de poids, 100 % lo
 ## Données de seed (à pré-remplir au premier lancement)
 
 ### Cibles par défaut
-- kcal : 2300
-- Protéines : 195 g
-- Glucides : 215 g
-- Lipides : 75 g
-- Poids de départ : 106.7 kg
-- Poids actuel initial (première pesée) : 97 kg
-- Poids objectif : 85 kg
+Aucune valeur personnelle n'est pré-remplie : le poids actuel, le poids objectif et les cibles
+sont demandés à l'utilisateur au premier lancement (cibles proposées par défaut : 2000 kcal,
+120 g de protéines, 220 g de glucides, 70 g de lipides).
 
 ### Aliments favoris (valeurs pour 100 g)
 | Nom | kcal | P | G | L |

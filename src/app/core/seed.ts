@@ -1,6 +1,5 @@
 import { getDb } from './db';
-import { newId, toDateKey, type Food, type Meal, type Settings, type WeightEntry } from './models';
-import { DEFAULT_SETTINGS } from './settings.service';
+import { newId, type Food, type Meal } from './models';
 
 /** [name, kcal, protein, carbs, fat] per 100 g. */
 const SEED_FOODS: [string, number, number, number, number][] = [
@@ -57,10 +56,9 @@ const SEED_MEALS: [string, [string, number][]][] = [
   ['Avant-coucher', [['Whey (pour 100 g)', 30]]],
 ];
 
-const INITIAL_WEIGHT_KG = 97;
-
 /**
- * Populates the database on first launch. No-op once any food exists, so it never
+ * Populates the food and meal catalogue on first launch — nothing personal: targets and
+ * weight come from the welcome form. No-op once any food exists, so it never
  * fights with user data or re-runs after a manual reset + import.
  */
 export async function seedIfEmpty(): Promise<boolean> {
@@ -85,19 +83,10 @@ export async function seedIfEmpty(): Promise<boolean> {
     items: items.map(([foodName, grams]) => ({ foodId: idByName.get(foodName)!, grams })),
   }));
 
-  const settings: Settings = { ...DEFAULT_SETTINGS };
-  const weight: WeightEntry = {
-    id: newId(),
-    date: toDateKey(new Date()),
-    weightKg: INITIAL_WEIGHT_KG,
-  };
-
-  const tx = db.transaction(['foods', 'meals', 'settings', 'weightEntries'], 'readwrite');
+  const tx = db.transaction(['foods', 'meals'], 'readwrite');
   await Promise.all([
     ...foods.map((f) => tx.objectStore('foods').put(f)),
     ...meals.map((m) => tx.objectStore('meals').put(m)),
-    tx.objectStore('settings').put(settings),
-    tx.objectStore('weightEntries').put(weight),
     tx.done,
   ]);
   return true;

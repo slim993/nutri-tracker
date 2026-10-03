@@ -51,7 +51,8 @@ export class DataService {
     }
   }
 
-  private async reloadAll(): Promise<void> {
+  /** Re-reads every store into its signal — sync calls it after applying remote changes. */
+  async reloadAll(): Promise<void> {
     await Promise.all([
       this.foods.load(),
       this.meals.load(),

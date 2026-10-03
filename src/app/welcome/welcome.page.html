@@ -1,0 +1,84 @@
+<h1>Bienvenue 👋</h1>
+<p class="muted intro">
+  Quelques informations pour démarrer. Tout est modifiable ensuite dans les réglages.
+</p>
+
+@if (error(); as e) {
+  <p class="flash ko">{{ e }}</p>
+}
+
+<section class="card">
+  <h2>Ton poids</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="w-current">Poids actuel (kg)</label>
+      <input
+        id="w-current"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        [ngModel]="currentKg()"
+        (ngModelChange)="currentKg.set($event)"
+      />
+    </div>
+    <div class="field">
+      <label for="w-goal">Poids objectif (kg)</label>
+      <input
+        id="w-goal"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        [ngModel]="goalKg()"
+        (ngModelChange)="goalKg.set($event)"
+      />
+    </div>
+  </div>
+
+  <h2>Tes cibles quotidiennes</h2>
+  <p class="muted hint">Valeurs indicatives : ajuste-les à ton objectif.</p>
+  <div class="grid">
+    <div class="field">
+      <label for="w-kcal">Calories</label>
+      <input
+        id="w-kcal"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="kcal()"
+        (ngModelChange)="kcal.set($event)"
+      />
+    </div>
+    <div class="field">
+      <label for="w-prot">Protéines (g)</label>
+      <input
+        id="w-prot"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="protein()"
+        (ngModelChange)="protein.set($event)"
+      />
+    </div>
+    <div class="field">
+      <label for="w-carb">Glucides (g)</label>
+      <input
+        id="w-carb"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="carbs()"
+        (ngModelChange)="carbs.set($event)"
+      />
+    </div>
+    <div class="field">
+      <label for="w-fat">Lipides (g)</label>
+      <input
+        id="w-fat"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="fat()"
+        (ngModelChange)="fat.set($event)"
+      />
+    </div>
+  </div>
+  <button class="btn btn-primary full" [disabled]="!canStart()" (click)="start()">Commencer</button>
+</section>
+
+<app-account-panel />
