@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { buildProgram, computeTargets, weeksToGoal, type CoachProfile } from './coach';
+
+// These assertions read French text: pin the language before the modules under test load.
+vi.hoisted(() => localStorage.setItem('nutri-lang', 'fr'));
 
 const profile = (patch: Partial<CoachProfile> = {}): CoachProfile => ({
   sex: 'male',

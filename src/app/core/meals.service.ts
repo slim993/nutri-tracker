@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { dbTry, getDb } from './db';
 import { FoodsService } from './foods.service';
 import { macrosFor, newId, sumMacros, type Macros, type Meal } from './models';
+import { LOCALE } from './i18n';
 
 @Injectable({ providedIn: 'root' })
 export class MealsService {
@@ -9,7 +10,7 @@ export class MealsService {
   private readonly _meals = signal<Meal[]>([]);
 
   readonly meals = computed(() =>
-    [...this._meals()].sort((a, b) => a.name.localeCompare(b.name, 'fr')),
+    [...this._meals()].sort((a, b) => a.name.localeCompare(b.name, LOCALE)),
   );
 
   get(id: string): Meal | undefined {

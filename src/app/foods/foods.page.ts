@@ -3,6 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FoodsService } from '../core/foods.service';
 import type { Food } from '../core/models';
+import { t } from '../core/i18n';
 
 type Draft = Omit<Food, 'id' | 'unit'> & { id?: string };
 
@@ -23,6 +24,7 @@ const BLANK_DRAFT: Draft = {
   styleUrl: './foods.page.scss',
 })
 export class FoodsPage {
+  protected readonly t = t;
   protected readonly foods = inject(FoodsService);
 
   protected readonly query = signal('');
@@ -66,7 +68,8 @@ export class FoodsPage {
   }
 
   protected async remove(id: string): Promise<void> {
-    if (!confirm('Supprimer cet aliment ? Les entrées déjà loguées resteront sans détail.')) return;
+    if (!confirm(t('Supprimer cet aliment ? Les entrées déjà loguées resteront sans détail.')))
+      return;
     await this.foods.remove(id);
     this.draft.set(null);
   }

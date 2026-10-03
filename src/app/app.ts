@@ -4,6 +4,7 @@ import { DataService } from './core/data.service';
 import { SettingsService } from './core/settings.service';
 import { SUPABASE_CONFIGURED } from './core/supabase.config';
 import { WelcomePage } from './welcome/welcome.page';
+import { t } from './core/i18n';
 
 @Component({
   selector: 'app-root',
@@ -12,18 +13,19 @@ import { WelcomePage } from './welcome/welcome.page';
   styleUrl: './app.scss',
 })
 export class App {
+  protected readonly t = t;
   protected readonly data = inject(DataService);
   protected readonly settings = inject(SettingsService);
   private readonly injector = inject(Injector);
 
   protected readonly tabs = [
-    { path: '/journal', label: 'Journal', icon: '📓' },
-    { path: '/aliments', label: 'Aliments', icon: '🥗' },
-    { path: '/repas', label: 'Repas', icon: '🍽️' },
-    { path: '/poids', label: 'Poids', icon: '⚖️' },
-    { path: '/entrainement', label: 'Sport', icon: '🏋️' },
-    { path: '/stats', label: 'Stats', icon: '📈' },
-    { path: '/reglages', label: 'Réglages', icon: '⚙️' },
+    { path: '/journal', label: t('Journal'), icon: '📓' },
+    { path: '/aliments', label: t('Aliments'), icon: '🥗' },
+    { path: '/repas', label: t('Repas'), icon: '🍽️' },
+    { path: '/poids', label: t('Poids'), icon: '⚖️' },
+    { path: '/entrainement', label: t('Sport'), icon: '🏋️' },
+    { path: '/stats', label: t('Stats'), icon: '📈' },
+    { path: '/reglages', label: t('Réglages'), icon: '⚙️' },
   ];
 
   constructor() {

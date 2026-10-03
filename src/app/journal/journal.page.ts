@@ -13,6 +13,7 @@ import {
   type Macros,
   type MealSlot,
 } from '../core/models';
+import { LOCALE, t } from '../core/i18n';
 
 interface SlotGroup {
   id: MealSlot;
@@ -29,6 +30,7 @@ interface SlotGroup {
   styleUrl: './journal.page.scss',
 })
 export class JournalPage {
+  protected readonly t = t;
   private readonly log = inject(LogService);
   private readonly settings = inject(SettingsService);
 
@@ -65,7 +67,7 @@ export class JournalPage {
   protected readonly isToday = computed(() => this.date() === toDateKey(new Date()));
 
   protected readonly prettyDate = computed(() =>
-    fromDateKey(this.date()).toLocaleDateString('fr-FR', {
+    fromDateKey(this.date()).toLocaleDateString(LOCALE, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

@@ -1,8 +1,8 @@
-<h1>Mes aliments</h1>
+<h1>{{ t('Mes aliments') }}</h1>
 
 <input
   type="search"
-  placeholder="Rechercher…"
+  [placeholder]="t('Rechercher…')"
   [ngModel]="query()"
   (ngModelChange)="query.set($event)"
 />
@@ -10,59 +10,94 @@
 <section class="card list">
   @for (food of listed(); track food.id) {
     <div class="entry">
-      <button class="star" (click)="foods.toggleFavorite(food.id)" [attr.aria-label]="'Favori ' + food.name">
+      <button
+        class="star"
+        (click)="foods.toggleFavorite(food.id)"
+        [attr.aria-label]="t('Favori') + ' ' + food.name"
+      >
         {{ food.isFavorite ? '★' : '☆' }}
       </button>
       <button class="entry-main" (click)="startEdit(food)">
         <span>{{ food.name }}</span>
         <span class="muted">
           {{ food.kcal | number: '1.0-0' }} kcal · P {{ food.protein | number: '1.0-1' }} ·
-          G {{ food.carbs | number: '1.0-1' }} · L {{ food.fat | number: '1.0-1' }} /100 g
+          {{ t('G') }} {{ food.carbs | number: '1.0-1' }} · {{ t('L') }}
+          {{ food.fat | number: '1.0-1' }} /100 g
         </span>
       </button>
     </div>
   } @empty {
-    <p class="empty">Aucun aliment.</p>
+    <p class="empty">{{ t('Aucun aliment.') }}</p>
   }
 </section>
 
-<button class="fab" (click)="startCreate()" aria-label="Nouvel aliment">+</button>
+<button class="fab" (click)="startCreate()" [attr.aria-label]="t('Nouvel aliment')">+</button>
 
 @if (draft(); as d) {
   <div class="backdrop" (click)="draft.set(null)"></div>
   <div class="sheet">
-    <h2>{{ d.id ? 'Modifier' : 'Nouvel aliment' }}</h2>
+    <h2>{{ d.id ? t('Modifier') : t('Nouvel aliment') }}</h2>
     <div class="field">
-      <label for="name">Nom</label>
+      <label for="name">{{ t('Nom') }}</label>
       <input id="name" [ngModel]="d.name" (ngModelChange)="patch('name', $event)" />
     </div>
     <div class="grid">
       <div class="field">
-        <label for="kcal">kcal /100 g</label>
-        <input id="kcal" type="number" inputmode="decimal" [ngModel]="d.kcal" (ngModelChange)="patch('kcal', $event)" />
+        <label for="kcal">{{ t('kcal /100 g') }}</label>
+        <input
+          id="kcal"
+          type="number"
+          inputmode="decimal"
+          [ngModel]="d.kcal"
+          (ngModelChange)="patch('kcal', $event)"
+        />
       </div>
       <div class="field">
-        <label for="prot">Protéines</label>
-        <input id="prot" type="number" inputmode="decimal" [ngModel]="d.protein" (ngModelChange)="patch('protein', $event)" />
+        <label for="prot">{{ t('Protéines') }}</label>
+        <input
+          id="prot"
+          type="number"
+          inputmode="decimal"
+          [ngModel]="d.protein"
+          (ngModelChange)="patch('protein', $event)"
+        />
       </div>
       <div class="field">
-        <label for="carb">Glucides</label>
-        <input id="carb" type="number" inputmode="decimal" [ngModel]="d.carbs" (ngModelChange)="patch('carbs', $event)" />
+        <label for="carb">{{ t('Glucides') }}</label>
+        <input
+          id="carb"
+          type="number"
+          inputmode="decimal"
+          [ngModel]="d.carbs"
+          (ngModelChange)="patch('carbs', $event)"
+        />
       </div>
       <div class="field">
-        <label for="fat">Lipides</label>
-        <input id="fat" type="number" inputmode="decimal" [ngModel]="d.fat" (ngModelChange)="patch('fat', $event)" />
+        <label for="fat">{{ t('Lipides') }}</label>
+        <input
+          id="fat"
+          type="number"
+          inputmode="decimal"
+          [ngModel]="d.fat"
+          (ngModelChange)="patch('fat', $event)"
+        />
       </div>
     </div>
     <label class="check">
-      <input type="checkbox" [ngModel]="d.isFavorite" (ngModelChange)="patch('isFavorite', $event)" />
-      Favori (accès rapide depuis le journal)
+      <input
+        type="checkbox"
+        [ngModel]="d.isFavorite"
+        (ngModelChange)="patch('isFavorite', $event)"
+      />
+      {{ t('Favori (accès rapide depuis le journal)') }}
     </label>
     <div class="row">
       @if (d.id; as id) {
-        <button class="btn btn-danger" (click)="remove(id)">Supprimer</button>
+        <button class="btn btn-danger" (click)="remove(id)">{{ t('Supprimer') }}</button>
       }
-      <button class="btn btn-primary" style="flex: 1" (click)="save()">Enregistrer</button>
+      <button class="btn btn-primary" style="flex: 1" (click)="save()">
+        {{ t('Enregistrer') }}
+      </button>
     </div>
   </div>
 }

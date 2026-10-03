@@ -1,12 +1,12 @@
-<h1>Repas types</h1>
+<h1>{{ t('Repas types') }}</h1>
 
 <app-claude-panel
-  title="Plan de repas de la semaine"
+  [title]="t('Plan de repas de la semaine')"
   [buildPrompt]="buildMealPrompt"
   [doImport]="importMealPlan"
 />
 
-<p class="muted hint">Loggue un repas entier en un tap depuis le journal.</p>
+<p class="muted hint">{{ t('Loggue un repas entier en un tap depuis le journal.') }}</p>
 
 <section class="card list">
   @for (meal of meals.meals(); track meal.id) {
@@ -14,27 +14,28 @@
       <button class="entry-main" (click)="startEdit(meal)">
         <span>{{ meal.name }}</span>
         <span class="muted">
-          {{ meals.totals(meal).kcal | number: '1.0-0' }} kcal ·
-          P {{ meals.totals(meal).protein | number: '1.0-0' }} ·
-          G {{ meals.totals(meal).carbs | number: '1.0-0' }} ·
-          L {{ meals.totals(meal).fat | number: '1.0-0' }} · {{ meal.items.length }} aliments
+          {{ meals.totals(meal).kcal | number: '1.0-0' }} kcal · P
+          {{ meals.totals(meal).protein | number: '1.0-0' }} · {{ t('G') }}
+          {{ meals.totals(meal).carbs | number: '1.0-0' }} · {{ t('L') }}
+          {{ meals.totals(meal).fat | number: '1.0-0' }} · {{ meal.items.length }}
+          {{ t('aliments') }}
         </span>
       </button>
     </div>
   } @empty {
-    <p class="empty">Aucun repas type.</p>
+    <p class="empty">{{ t('Aucun repas type.') }}</p>
   }
 </section>
 
-<button class="fab" (click)="startCreate()" aria-label="Nouveau repas type">+</button>
+<button class="fab" (click)="startCreate()" [attr.aria-label]="t('Nouveau repas type')">+</button>
 
 @if (draft(); as d) {
   <div class="backdrop" (click)="draft.set(null)"></div>
   <div class="sheet">
-    <h2>{{ d.id ? 'Modifier le repas' : 'Nouveau repas type' }}</h2>
+    <h2>{{ d.id ? t('Modifier le repas') : t('Nouveau repas type') }}</h2>
 
     <div class="field">
-      <label for="meal-name">Nom</label>
+      <label for="meal-name">{{ t('Nom') }}</label>
       <input id="meal-name" [ngModel]="d.name" (ngModelChange)="setName($event)" />
     </div>
 
@@ -45,15 +46,21 @@
           <span class="muted">
             {{ item.grams }} g · {{ itemMacros(item).kcal | number: '1.0-0' }} kcal
           </span>
-          <button class="del" (click)="removeItem($index)" aria-label="Retirer">✕</button>
+          <button class="del" (click)="removeItem($index)" [attr.aria-label]="t('Retirer')">
+            ✕
+          </button>
         </div>
       } @empty {
-        <p class="empty">Ajoute des aliments ci-dessous.</p>
+        <p class="empty">{{ t('Ajoute des aliments ci-dessous.') }}</p>
       }
     </div>
 
     <div class="add-row">
-      <select [ngModel]="newFoodId()" (ngModelChange)="newFoodId.set($event)" aria-label="Aliment">
+      <select
+        [ngModel]="newFoodId()"
+        (ngModelChange)="newFoodId.set($event)"
+        [attr.aria-label]="t('Aliment')"
+      >
         @for (food of foods.foods(); track food.id) {
           <option [value]="food.id">{{ food.name }}</option>
         }
@@ -62,23 +69,23 @@
         type="number"
         inputmode="numeric"
         min="1"
-        aria-label="Grammes"
+        [attr.aria-label]="t('Grammes')"
         [ngModel]="newGrams()"
         (ngModelChange)="newGrams.set($event)"
       />
-      <button class="btn" (click)="addItem()">Ajouter</button>
+      <button class="btn" (click)="addItem()">{{ t('Ajouter') }}</button>
     </div>
 
     <p class="totals">
-      Total : <strong>{{ draftTotals().kcal | number: '1.0-0' }} kcal</strong> ·
-      P {{ draftTotals().protein | number: '1.0-1' }} ·
-      G {{ draftTotals().carbs | number: '1.0-1' }} ·
-      L {{ draftTotals().fat | number: '1.0-1' }}
+      {{ t('Total :') }} <strong>{{ draftTotals().kcal | number: '1.0-0' }} kcal</strong> · P
+      {{ draftTotals().protein | number: '1.0-1' }} · {{ t('G') }}
+      {{ draftTotals().carbs | number: '1.0-1' }} · {{ t('L') }}
+      {{ draftTotals().fat | number: '1.0-1' }}
     </p>
 
     <div class="row">
       @if (d.id; as id) {
-        <button class="btn btn-danger" (click)="remove(id)">Supprimer</button>
+        <button class="btn btn-danger" (click)="remove(id)">{{ t('Supprimer') }}</button>
       }
       <button
         class="btn btn-primary"
@@ -86,7 +93,7 @@
         [disabled]="!d.name.trim() || d.items.length === 0"
         (click)="save()"
       >
-        Enregistrer
+        {{ t('Enregistrer') }}
       </button>
     </div>
   </div>

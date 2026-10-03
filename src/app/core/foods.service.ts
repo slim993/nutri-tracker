@@ -1,13 +1,14 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { dbTry, getDb } from './db';
 import { newId, type Food } from './models';
+import { LOCALE, t } from './i18n';
 
 @Injectable({ providedIn: 'root' })
 export class FoodsService {
   private readonly _foods = signal<Food[]>([]);
 
   readonly foods = computed(() =>
-    [...this._foods()].sort((a, b) => a.name.localeCompare(b.name, 'fr')),
+    [...this._foods()].sort((a, b) => a.name.localeCompare(b.name, LOCALE)),
   );
   readonly favorites = computed(() => this.foods().filter((f) => f.isFavorite));
 
@@ -18,7 +19,7 @@ export class FoodsService {
   }
 
   name(id: string): string {
-    return this.get(id)?.name ?? 'Aliment supprimé';
+    return this.get(id)?.name ?? t('Aliment supprimé');
   }
 
   search(query: string): Food[] {

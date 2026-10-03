@@ -7,6 +7,7 @@ import { SettingsService } from '../core/settings.service';
 import { WeightService } from '../core/weight.service';
 import { fromDateKey, toDateKey } from '../core/models';
 import { LINE_CHART_OPTIONS } from '../shared/chart-defaults';
+import { LOCALE, t } from '../core/i18n';
 
 @Component({
   selector: 'app-weight',
@@ -16,6 +17,7 @@ import { LINE_CHART_OPTIONS } from '../shared/chart-defaults';
   styleUrl: './weight.page.scss',
 })
 export class WeightPage {
+  protected readonly t = t;
   protected readonly weight = inject(WeightService);
   private readonly settingsService = inject(SettingsService);
 
@@ -38,12 +40,12 @@ export class WeightPage {
     const goal = this.settings().weightGoalKg;
     return {
       labels: entries.map((e) =>
-        fromDateKey(e.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+        fromDateKey(e.date).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit' }),
       ),
       datasets: [
         {
           data: entries.map((e) => e.weightKg),
-          label: 'Poids (kg)',
+          label: t('Poids (kg)'),
           borderColor: '#4ade80',
           backgroundColor: 'rgba(74, 222, 128, 0.15)',
           fill: true,
@@ -52,7 +54,7 @@ export class WeightPage {
         },
         {
           data: entries.map(() => goal),
-          label: 'Objectif',
+          label: t('Objectif'),
           borderColor: '#f59e0b',
           borderDash: [6, 6],
           borderWidth: 1.5,
@@ -75,7 +77,7 @@ export class WeightPage {
   }
 
   protected pretty(date: string): string {
-    return fromDateKey(date).toLocaleDateString('fr-FR', {
+    return fromDateKey(date).toLocaleDateString(LOCALE, {
       day: '2-digit',
       month: 'short',
       year: '2-digit',

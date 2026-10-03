@@ -1,7 +1,8 @@
 import { getDb } from './db';
+import { t } from './i18n';
 import { newId, type Food, type Meal } from './models';
 
-/** [name, kcal, protein, carbs, fat] per 100 g. */
+/** [French name — translated when seeding —, kcal, protein, carbs, fat] per 100 g. */
 const SEED_FOODS: [string, number, number, number, number][] = [
   ['Œuf entier', 143, 13, 1, 10],
   ['Flocons d’avoine', 380, 13, 60, 7],
@@ -65,21 +66,26 @@ export async function seedIfEmpty(): Promise<boolean> {
   const db = await getDb();
   if ((await db.count('foods')) > 0) return false;
 
-  const foods: Food[] = SEED_FOODS.map(([name, kcal, protein, carbs, fat]) => ({
-    id: newId(),
-    name,
-    kcal,
-    protein,
-    carbs,
-    fat,
-    unit: 'g',
-    isFavorite: !NON_FAVORITE.has(name),
-  }));
-  const idByName = new Map(foods.map((f) => [f.name, f.id]));
+  // Seeded once, in the language of the first launch; the user can rename anything afterwards.
+  const idByName = new Map<string, string>();
+  const foods: Food[] = SEED_FOODS.map(([name, kcal, protein, carbs, fat]) => {
+    const id = newId();
+    idByName.set(name, id);
+    return {
+      id,
+      name: t(name),
+      kcal,
+      protein,
+      carbs,
+      fat,
+      unit: 'g',
+      isFavorite: !NON_FAVORITE.has(name),
+    };
+  });
 
   const meals: Meal[] = SEED_MEALS.map(([name, items]) => ({
     id: newId(),
-    name,
+    name: t(name),
     items: items.map(([foodName, grams]) => ({ foodId: idByName.get(foodName)!, grams })),
   }));
 

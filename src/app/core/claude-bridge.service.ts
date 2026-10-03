@@ -15,6 +15,7 @@ import {
   type Workout,
   type WorkoutExercise,
 } from './models';
+import { LANG, t } from './i18n';
 
 export interface ParsedMealPlan {
   /** New foods Claude introduced, per-100 g values. */
@@ -54,12 +55,14 @@ export class ClaudeBridgeService {
       .forRange(shiftDateKey(today, -28), today)
       .map(
         (w) =>
-          `- ${w.date} ${w.done ? '[faite]' : '[prévue]'} ${w.name} : ` +
+          `- ${w.date} ${w.done ? t('[faite]') : t('[prévue]')} ${w.name} : ` +
           w.exercises.map((e) => this.exerciseLabel(e)).join(', '),
       )
       .join('\n');
 
     const nutrition = this.recentNutritionSummary();
+
+    if (LANG === 'en') return this.workoutPromptEn(recentWeights, recentWorkouts, nutrition);
 
     return `Tu es mon coach sportif. Programme-moi les séances d'entraînement de la semaine à venir.
 
@@ -68,13 +71,13 @@ export class ClaudeBridgeService {
 - Cibles nutrition quotidiennes : ${s.kcalTarget} kcal, ${s.proteinTarget} g protéines, ${s.carbsTarget} g glucides, ${s.fatTarget} g lipides
 
 ## Pesées récentes
-${recentWeights || '- (aucune)'}
+${recentWeights || t('- (aucune)')}
 
 ## Nutrition des 7 derniers jours (moyennes réelles)
 ${nutrition}
 
 ## Séances des 4 dernières semaines
-${recentWorkouts || '- (aucune — pars sur un programme débutant/reprise progressif)'}
+${recentWorkouts || t('- (aucune — pars sur un programme débutant/reprise progressif)')}
 
 ## Ce que j'attends
 Propose un programme pour les 7 prochains jours (à partir du ${today}), cohérent avec mon historique et mon objectif. Explique brièvement tes choix, PUIS termine ta réponse par un bloc de code JSON strictement au format suivant (dates réelles au format YYYY-MM-DD, poids en kg ou champ omis pour le poids du corps) :
@@ -108,12 +111,12 @@ Ce JSON sera importé tel quel dans mon application de suivi : n'invente pas d'a
     try {
       parsed = JSON.parse(json);
     } catch {
-      throw new Error('JSON introuvable ou invalide. Colle la réponse complète de Claude.');
+      throw new Error(t('JSON introuvable ou invalide. Colle la réponse complète de Claude.'));
     }
 
     const sessions = (parsed as { sessions?: unknown }).sessions;
     if (!Array.isArray(sessions) || sessions.length === 0) {
-      throw new Error('Le JSON ne contient pas de tableau "sessions".');
+      throw new Error(t('Le JSON ne contient pas de tableau "sessions".'));
     }
 
     return sessions.map((raw, i) => {
@@ -121,16 +124,16 @@ Ce JSON sera importé tel quel dans mon application de suivi : n'invente pas d'a
       const date = String(session['date'] ?? '');
       const name = String(session['name'] ?? '').trim();
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !name) {
-        throw new Error(`Séance ${i + 1} : date (YYYY-MM-DD) ou nom manquant.`);
+        throw new Error(t('Séance {n} : date (YYYY-MM-DD) ou nom manquant.', { n: i + 1 }));
       }
       const exercisesRaw = session['exercises'];
       if (!Array.isArray(exercisesRaw) || exercisesRaw.length === 0) {
-        throw new Error(`Séance ${i + 1} (${name}) : aucun exercice.`);
+        throw new Error(t('Séance {n} ({name}) : aucun exercice.', { n: i + 1, name }));
       }
       const exercises: WorkoutExercise[] = exercisesRaw.map((e) => {
         const ex = e as Record<string, unknown>;
         return {
-          name: String(ex['name'] ?? 'Exercice').trim(),
+          name: String(ex['name'] ?? t('Exercice')).trim(),
           sets: Number(ex['sets']) || 1,
           reps: String(ex['reps'] ?? '').trim() || '—',
           ...(ex['weightKg'] != null && Number(ex['weightKg']) > 0
@@ -159,19 +162,21 @@ Ce JSON sera importé tel quel dans mon application de suivi : n'invente pas d'a
       .foods()
       .map(
         (f) =>
-          `- ${f.name} — ${f.kcal} kcal, P ${f.protein}, G ${f.carbs}, L ${f.fat}` +
-          (f.isFavorite ? ' (favori)' : ''),
+          `- ${f.name} — ${f.kcal} kcal, P ${f.protein}, ${t('G')} ${f.carbs}, ${t('L')} ${f.fat}` +
+          (f.isFavorite ? t(' (favori)') : ''),
       )
       .join('\n');
 
     const meals = this.meals
       .meals()
       .map((m) => {
-        const t = this.meals.totals(m);
+        const totals = this.meals.totals(m);
         const items = m.items.map((i) => `${this.foods.name(i.foodId)} ${i.grams} g`).join(' + ');
-        return `- ${m.name} : ${items} (~${Math.round(t.kcal)} kcal, P ${Math.round(t.protein)})`;
+        return `- ${m.name} : ${items} (~${Math.round(totals.kcal)} kcal, P ${Math.round(totals.protein)})`;
       })
       .join('\n');
+
+    if (LANG === 'en') return this.mealPlanPromptEn(foods, meals);
 
     return `Tu es mon coach nutrition. Planifie tous mes repas des 7 prochains jours (à partir du ${today}).
 
@@ -180,10 +185,10 @@ Ce JSON sera importé tel quel dans mon application de suivi : n'invente pas d'a
 - Cibles quotidiennes : ${s.kcalTarget} kcal, ${s.proteinTarget} g protéines, ${s.carbsTarget} g glucides, ${s.fatTarget} g lipides
 
 ## Mes aliments (valeurs pour 100 g — réutilise ces noms EXACTS)
-${foods || '- (aucun)'}
+${foods || t('- (aucun)')}
 
 ## Mes repas types habituels (pour t'inspirer)
-${meals || '- (aucun)'}
+${meals || t('- (aucun)')}
 
 ## Nutrition récente
 ${this.recentNutritionSummary()}
@@ -220,20 +225,20 @@ Ce JSON sera importé tel quel dans mon application : n'invente pas d'autres cha
     try {
       parsed = JSON.parse(json);
     } catch {
-      throw new Error('JSON introuvable ou invalide. Colle la réponse complète de Claude.');
+      throw new Error(t('JSON introuvable ou invalide. Colle la réponse complète de Claude.'));
     }
 
     const root = parsed as Record<string, unknown>;
     const daysRaw = root['days'];
     if (!Array.isArray(daysRaw) || daysRaw.length === 0) {
-      throw new Error('Le JSON ne contient pas de tableau "days".');
+      throw new Error(t('Le JSON ne contient pas de tableau "days".'));
     }
 
     const validSlots = new Set<string>(MEAL_SLOTS.map((s) => s.id));
     const newFoods = (Array.isArray(root['newFoods']) ? root['newFoods'] : []).map((raw) => {
       const f = raw as Record<string, unknown>;
       const name = String(f['name'] ?? '').trim();
-      if (!name) throw new Error('Un aliment de "newFoods" n’a pas de nom.');
+      if (!name) throw new Error(t('Un aliment de "newFoods" n’a pas de nom.'));
       return {
         name,
         kcal: Number(f['kcal']) || 0,
@@ -247,11 +252,13 @@ Ce JSON sera importé tel quel dans mon application : n'invente pas d'autres cha
       const day = raw as Record<string, unknown>;
       const date = String(day['date'] ?? '');
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        throw new Error(`Jour ${i + 1} : date manquante ou invalide (attendu YYYY-MM-DD).`);
+        throw new Error(
+          t('Jour {n} : date manquante ou invalide (attendu YYYY-MM-DD).', { n: i + 1 }),
+        );
       }
       const mealsRaw = day['meals'];
       if (!Array.isArray(mealsRaw) || mealsRaw.length === 0) {
-        throw new Error(`Jour ${date} : aucun repas.`);
+        throw new Error(t('Jour {date} : aucun repas.', { date }));
       }
       const meals = mealsRaw.map((m) => {
         const meal = m as Record<string, unknown>;
@@ -259,14 +266,14 @@ Ce JSON sera importé tel quel dans mon application : n'invente pas d'autres cha
         const slot = (validSlots.has(slotRaw) ? slotRaw : 'other') as MealSlot;
         const itemsRaw = meal['items'];
         if (!Array.isArray(itemsRaw) || itemsRaw.length === 0) {
-          throw new Error(`Jour ${date} : un repas est vide.`);
+          throw new Error(t('Jour {date} : un repas est vide.', { date }));
         }
         const items = itemsRaw.map((it) => {
           const item = it as Record<string, unknown>;
           const food = String(item['food'] ?? '').trim();
           const grams = Number(item['grams']);
           if (!food || !grams || grams <= 0) {
-            throw new Error(`Jour ${date} : aliment ou quantité invalide.`);
+            throw new Error(t('Jour {date} : aliment ou quantité invalide.', { date }));
           }
           return { food, grams };
         });
@@ -300,7 +307,9 @@ Ce JSON sera importé tel quel dans mon application : n'invente pas d'autres cha
     }
     if (missing.size > 0) {
       throw new Error(
-        `Aliments inconnus : ${[...missing].join(', ')}. Demande à Claude de les déclarer dans "newFoods".`,
+        t('Aliments inconnus : {names}. Demande à Claude de les déclarer dans "newFoods".', {
+          names: [...missing].join(', '),
+        }),
       );
     }
 
@@ -325,11 +334,106 @@ Ce JSON sera importé tel quel dans mon application : n'invente pas d'autres cha
     await this.log.addMany(entries);
 
     const created = plan.newFoods.length;
-    return (
-      `${plan.days.length} jour(s) planifié(s) dans le journal` +
-      (created > 0 ? ` (+${created} nouvel(aux) aliment(s))` : '') +
-      '.'
-    );
+    return created > 0
+      ? t('{days} jour(s) planifié(s) dans le journal (+{foods} nouvel(aux) aliment(s)).', {
+          days: plan.days.length,
+          foods: created,
+        })
+      : t('{days} jour(s) planifié(s) dans le journal.', { days: plan.days.length });
+  }
+
+  // --- English versions of the two prompts. The JSON contract is identical in both languages. ---
+
+  private workoutPromptEn(
+    recentWeights: string,
+    recentWorkouts: string,
+    nutrition: string,
+  ): string {
+    const s = this.settings.settings();
+    const today = toDateKey(new Date());
+    const current = this.weight.latest()?.weightKg ?? s.startWeightKg;
+
+    return `You are my fitness coach. Plan my training sessions for the coming week.
+
+## My profile
+- Current weight: ${current} kg (started at ${s.startWeightKg} kg, goal ${s.weightGoalKg} kg — ${weightGoalLabel(current, s.weightGoalKg)})
+- Daily nutrition targets: ${s.kcalTarget} kcal, ${s.proteinTarget} g protein, ${s.carbsTarget} g carbs, ${s.fatTarget} g fat
+
+## Recent weigh-ins
+${recentWeights || t('- (aucune)')}
+
+## Nutrition over the last 7 days (actual averages)
+${nutrition}
+
+## Sessions of the last 4 weeks
+${recentWorkouts || t('- (aucune — pars sur un programme débutant/reprise progressif)')}
+
+## What I expect
+Suggest a programme for the next 7 days (starting ${today}), consistent with my history and my goal. Briefly explain your choices, THEN end your answer with a JSON code block in exactly this format (real dates as YYYY-MM-DD, weights in kg, or the field left out for bodyweight):
+
+\`\`\`json
+{
+  "sessions": [
+    {
+      "date": "${today}",
+      "name": "Push (chest/shoulders/triceps)",
+      "notes": "optional",
+      "exercises": [
+        { "name": "Bench press", "sets": 4, "reps": "8-10", "weightKg": 60 },
+        { "name": "Push-ups", "sets": 3, "reps": "max" }
+      ]
+    }
+  ]
+}
+\`\`\`
+
+This JSON will be imported as is into my tracking app: do not invent other fields and put only one JSON block in your answer.`;
+  }
+
+  private mealPlanPromptEn(foods: string, meals: string): string {
+    const s = this.settings.settings();
+    const today = toDateKey(new Date());
+    const current = this.weight.latest()?.weightKg ?? s.startWeightKg;
+
+    return `You are my nutrition coach. Plan all my meals for the next 7 days (starting ${today}).
+
+## My profile
+- Current weight: ${current} kg, goal ${s.weightGoalKg} kg (${weightGoalLabel(current, s.weightGoalKg)})
+- Daily targets: ${s.kcalTarget} kcal, ${s.proteinTarget} g protein, ${s.carbsTarget} g carbs, ${s.fatTarget} g fat
+
+## My foods (values per 100 g — reuse these EXACT names)
+${foods || t('- (aucun)')}
+
+## My usual meals (for inspiration)
+${meals || t('- (aucun)')}
+
+## Recent nutrition
+${this.recentNutritionSummary()}
+
+## What I expect
+- 7 full days, 4 to 5 meals a day, each day close to my targets (±5%).
+- Prefer my existing foods (exact names). If you introduce a new food, declare it in "newFoods" with its values per 100 g.
+- Easy to cook, varied, realistic quantities in grams (raw weight).
+
+Briefly explain your choices, THEN end your answer with ONE SINGLE JSON code block in exactly this format. Allowed slots: "breakfast", "lunch", "snack", "dinner", "other" (e.g. before bed):
+
+\`\`\`json
+{
+  "newFoods": [
+    { "name": "Courgette", "kcal": 17, "protein": 1.2, "carbs": 3.1, "fat": 0.3 }
+  ],
+  "days": [
+    {
+      "date": "${today}",
+      "meals": [
+        { "slot": "breakfast", "items": [ { "food": "Whole egg", "grams": 220 } ] }
+      ]
+    }
+  ]
+}
+\`\`\`
+
+This JSON will be imported as is into my app: do not invent other fields and put only one JSON block in your answer.`;
   }
 
   private extractJson(text: string): string {
@@ -346,16 +450,25 @@ Ce JSON sera importé tel quel dans mon application : n'invente pas d'autres cha
     const planned = `${e.name} ${e.sets}×${e.reps}${e.weightKg ? ` @${e.weightKg} kg` : ''}`;
     if (!e.performed?.length) return planned;
     const done = e.performed.map((p) => `${p.weightKg || 0}kg×${p.reps}`).join(', ');
-    return `${planned} (réalisé : ${done})`;
+    return t('{planned} (réalisé : {done})', { planned, done });
   }
 
   private recentNutritionSummary(): string {
     const today = toDateKey(new Date());
     const days = this.log.loggedDates().filter((d) => d >= shiftDateKey(today, -7) && d <= today);
-    if (days.length === 0) return '- (aucune entrée au journal)';
+    if (days.length === 0) return t('- (aucune entrée au journal)');
     const totals = days.map((d) => this.log.totalsForDate(d));
-    const avg = (pick: (t: (typeof totals)[0]) => number) =>
-      Math.round(totals.reduce((sum, t) => sum + pick(t), 0) / totals.length);
-    return `- ${avg((t) => t.kcal)} kcal/j, ${avg((t) => t.protein)} g protéines/j, ${avg((t) => t.carbs)} g glucides/j, ${avg((t) => t.fat)} g lipides/j (sur ${days.length} jours logués)`;
+    const avg = (pick: (day: (typeof totals)[0]) => number) =>
+      Math.round(totals.reduce((sum, day) => sum + pick(day), 0) / totals.length);
+    return t(
+      '- {kcal} kcal/j, {protein} g protéines/j, {carbs} g glucides/j, {fat} g lipides/j (sur {days} jours logués)',
+      {
+        kcal: avg((d) => d.kcal),
+        protein: avg((d) => d.protein),
+        carbs: avg((d) => d.carbs),
+        fat: avg((d) => d.fat),
+        days: days.length,
+      },
+    );
   }
 }

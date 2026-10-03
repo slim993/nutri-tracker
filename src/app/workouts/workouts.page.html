@@ -1,15 +1,15 @@
-<h1>Entraînement</h1>
+<h1>{{ t('Entraînement') }}</h1>
 
 <app-claude-panel
-  title="Programmer avec Claude"
+  [title]="t('Programmer avec Claude')"
   [buildPrompt]="buildWorkoutPrompt"
   [doImport]="importWorkoutPlan"
 />
 
 <header class="week">
-  <button class="nav" (click)="shiftWeek(-1)" aria-label="Semaine précédente">‹</button>
+  <button class="nav" (click)="shiftWeek(-1)" [attr.aria-label]="t('Semaine précédente')">‹</button>
   <h2>{{ weekLabel() }}</h2>
-  <button class="nav" (click)="shiftWeek(1)" aria-label="Semaine suivante">›</button>
+  <button class="nav" (click)="shiftWeek(1)" [attr.aria-label]="t('Semaine suivante')">›</button>
 </header>
 
 <section class="card list">
@@ -18,7 +18,7 @@
       <button
         class="check"
         (click)="workouts.toggleDone(workout.id)"
-        [attr.aria-label]="'Séance faite : ' + workout.name"
+        [attr.aria-label]="t('Séance faite :') + ' ' + workout.name"
       >
         {{ workout.done ? '✅' : '⬜' }}
       </button>
@@ -40,41 +40,43 @@
     </div>
   } @empty {
     <p class="empty">
-      Aucune séance cette semaine. Importe un plan de Claude ou crée une séance avec « + ».
+      {{
+        t('Aucune séance cette semaine. Importe un plan de Claude ou crée une séance avec « + ».')
+      }}
     </p>
   }
 </section>
 
-<button class="fab" (click)="startCreate()" aria-label="Nouvelle séance">+</button>
+<button class="fab" (click)="startCreate()" [attr.aria-label]="t('Nouvelle séance')">+</button>
 
 @if (draft(); as d) {
   <div class="backdrop" (click)="draft.set(null)"></div>
   <div class="sheet">
-    <h2>{{ d.id ? 'Modifier la séance' : 'Nouvelle séance' }}</h2>
+    <h2>{{ d.id ? t('Modifier la séance') : t('Nouvelle séance') }}</h2>
     <div class="grid">
       <div class="field">
-        <label for="w-date">Date</label>
+        <label for="w-date">{{ t('Date') }}</label>
         <input id="w-date" type="date" [ngModel]="d.date" (ngModelChange)="patch('date', $event)" />
       </div>
       <div class="field">
-        <label for="w-name">Nom</label>
+        <label for="w-name">{{ t('Nom') }}</label>
         <input
           id="w-name"
-          placeholder="Push, Legs…"
+          [placeholder]="t('Push, Legs…')"
           [ngModel]="d.name"
           (ngModelChange)="patch('name', $event)"
         />
       </div>
     </div>
 
-    <h3 class="ex-title">Exercices</h3>
+    <h3 class="ex-title">{{ t('Exercices') }}</h3>
     @for (e of d.exercises; track $index; let exIndex = $index) {
       <div class="ex-block">
         <div class="ex-row">
           <input
             class="ex-name"
-            placeholder="Exercice"
-            aria-label="Nom de l'exercice"
+            [placeholder]="t('Exercice')"
+            [attr.aria-label]="t('Nom de l’exercice')"
             [ngModel]="e.name"
             (ngModelChange)="patchExercise(exIndex, 'name', $event)"
           />
@@ -82,13 +84,13 @@
             type="number"
             inputmode="numeric"
             min="1"
-            aria-label="Séries prévues"
+            [attr.aria-label]="t('Séries prévues')"
             [ngModel]="e.sets"
             (ngModelChange)="patchExercise(exIndex, 'sets', $event)"
           />
           <input
-            placeholder="reps"
-            aria-label="Répétitions prévues"
+            [placeholder]="t('reps')"
+            [attr.aria-label]="t('Répétitions prévues')"
             [ngModel]="e.reps"
             (ngModelChange)="patchExercise(exIndex, 'reps', $event)"
           />
@@ -96,12 +98,16 @@
             type="number"
             inputmode="decimal"
             step="0.5"
-            placeholder="kg"
-            aria-label="Poids prévu en kg"
+            [placeholder]="t('kg')"
+            [attr.aria-label]="t('Poids prévu en kg')"
             [ngModel]="e.weightKg"
             (ngModelChange)="patchExercise(exIndex, 'weightKg', $event)"
           />
-          <button class="del" (click)="removeExercise(exIndex)" aria-label="Retirer l'exercice">
+          <button
+            class="del"
+            (click)="removeExercise(exIndex)"
+            [attr.aria-label]="t('Retirer l’exercice')"
+          >
             ✕
           </button>
         </div>
@@ -114,8 +120,8 @@
                 type="number"
                 inputmode="decimal"
                 step="0.5"
-                placeholder="poids (kg)"
-                aria-label="Poids réalisé en kg"
+                [placeholder]="t('poids (kg)')"
+                [attr.aria-label]="t('Poids réalisé en kg')"
                 [ngModel]="p.weightKg"
                 (ngModelChange)="patchPerformedSet(exIndex, setIndex, 'weightKg', $event)"
               />
@@ -123,31 +129,35 @@
                 type="number"
                 inputmode="numeric"
                 min="0"
-                placeholder="reps"
-                aria-label="Répétitions réalisées"
+                [placeholder]="t('reps')"
+                [attr.aria-label]="t('Répétitions réalisées')"
                 [ngModel]="p.reps"
                 (ngModelChange)="patchPerformedSet(exIndex, setIndex, 'reps', $event)"
               />
               <button
                 class="del"
                 (click)="removePerformedSet(exIndex, setIndex)"
-                aria-label="Retirer la série"
+                [attr.aria-label]="t('Retirer la série')"
               >
                 ✕
               </button>
             </div>
           }
-          <button class="btn add-set" (click)="addPerformedSet(exIndex)">+ Série réalisée</button>
+          <button class="btn add-set" (click)="addPerformedSet(exIndex)">
+            {{ t('+ Série réalisée') }}
+          </button>
         </div>
       </div>
     }
-    <button class="btn add-ex" (click)="addExercise()">+ Ajouter un exercice</button>
+    <button class="btn add-ex" (click)="addExercise()">{{ t('+ Ajouter un exercice') }}</button>
 
     <div class="row">
       @if (d.id; as id) {
-        <button class="btn btn-danger" (click)="remove(id)">Supprimer</button>
+        <button class="btn btn-danger" (click)="remove(id)">{{ t('Supprimer') }}</button>
       }
-      <button class="btn btn-primary" style="flex: 1" (click)="save()">Enregistrer</button>
+      <button class="btn btn-primary" style="flex: 1" (click)="save()">
+        {{ t('Enregistrer') }}
+      </button>
     </div>
   </div>
 }

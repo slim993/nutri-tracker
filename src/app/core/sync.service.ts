@@ -11,6 +11,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_CONFIGURED, SUPABASE_URL } from './supabase
 import { SYNC_STORES, canonical, planSync, recordKey, type RemoteRow } from './sync-plan';
 import { WeightService } from './weight.service';
 import { WorkoutsService } from './workouts.service';
+import { t } from './i18n';
 
 export type SyncStatus = 'idle' | 'syncing' | 'offline' | 'error';
 
@@ -27,15 +28,18 @@ const DEBOUNCE_MS = 2000;
 
 /** French messages for the Supabase auth error codes a user can actually trigger. */
 const AUTH_MESSAGES: Record<string, string> = {
-  otp_expired: 'Code incorrect ou expiré. Demande un nouveau code.',
-  over_email_send_rate_limit: 'Trop de codes demandés. Réessaie dans quelques minutes.',
-  over_request_rate_limit: 'Trop de tentatives. Réessaie dans quelques minutes.',
-  email_address_invalid: 'Cette adresse e-mail n’est pas valide.',
-  validation_failed: 'Cette adresse e-mail n’est pas valide.',
+  otp_expired: t('Code incorrect ou expiré. Demande un nouveau code.'),
+  over_email_send_rate_limit: t('Trop de codes demandés. Réessaie dans quelques minutes.'),
+  over_request_rate_limit: t('Trop de tentatives. Réessaie dans quelques minutes.'),
+  email_address_invalid: t('Cette adresse e-mail n’est pas valide.'),
+  validation_failed: t('Cette adresse e-mail n’est pas valide.'),
 };
 
 function authError(error: { code?: string; message: string }): Error {
-  return new Error(AUTH_MESSAGES[error.code ?? ''] ?? `Connexion impossible : ${error.message}`);
+  return new Error(
+    AUTH_MESSAGES[error.code ?? ''] ??
+      t('Connexion impossible : {message}', { message: error.message }),
+  );
 }
 
 /**
@@ -188,7 +192,7 @@ export class SyncService {
     } catch (err) {
       console.error('[sync]', err);
       this.status.set(navigator.onLine ? 'error' : 'offline');
-      this.error.set('La synchronisation a échoué. Elle sera retentée automatiquement.');
+      this.error.set(t('La synchronisation a échoué. Elle sera retentée automatiquement.'));
     } finally {
       this.running = false;
       if (this.queued) {

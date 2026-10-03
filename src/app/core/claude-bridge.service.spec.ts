@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ClaudeBridgeService } from './claude-bridge.service';
+
+// These assertions read French text: pin the language before the modules under test load.
+vi.hoisted(() => localStorage.setItem('nutri-lang', 'fr'));
 
 const VALID_PLAN = `{
   "sessions": [
@@ -87,9 +90,13 @@ describe('ClaudeBridgeService.parseMealPlan', () => {
   });
 
   it('tolerates a missing newFoods array', () => {
-    const plan = service.parseMealPlan('{ "days": ' + JSON.stringify([
-      { date: '2026-07-20', meals: [{ slot: 'lunch', items: [{ food: 'Riz', grams: 80 }] }] },
-    ]) + ' }');
+    const plan = service.parseMealPlan(
+      '{ "days": ' +
+        JSON.stringify([
+          { date: '2026-07-20', meals: [{ slot: 'lunch', items: [{ food: 'Riz', grams: 80 }] }] },
+        ]) +
+        ' }',
+    );
     expect(plan.newFoods).toEqual([]);
   });
 

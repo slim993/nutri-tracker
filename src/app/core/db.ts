@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Food, LogEntry, Meal, Settings, WeightEntry, Workout } from './models';
+import { t } from './i18n';
 
 export interface NutriDB extends DBSchema {
   foods: { key: string; value: Food };
@@ -114,7 +115,7 @@ export function getDb(): Promise<IDBPDatabase<NutriDB>> {
   dbPromise ??= openAndHeal().catch((err) => {
     // Reset the memoized promise so a later call can retry (e.g. private mode, quota).
     dbPromise = null;
-    throw new DbError('Impossible d’ouvrir la base locale.', err);
+    throw new DbError(t('Impossible d’ouvrir la base locale.'), err);
   });
   return dbPromise;
 }
@@ -135,6 +136,6 @@ export async function dbTry<T>(label: string, op: () => Promise<T>): Promise<T> 
     return await op();
   } catch (err) {
     console.error(`[db] ${label}`, err);
-    throw new DbError(`Erreur base de données : ${label}`, err);
+    throw new DbError(t('Erreur base de données : {label}', { label: t(label) }), err);
   }
 }

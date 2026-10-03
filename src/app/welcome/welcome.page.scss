@@ -14,8 +14,16 @@ a.btn {
   color: inherit;
 }
 
-h1 {
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 6px;
+
+  app-language-select {
+    flex: none;
+  }
 }
 
 .intro {

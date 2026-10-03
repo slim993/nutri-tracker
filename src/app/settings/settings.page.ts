@@ -6,15 +6,18 @@ import { SettingsService } from '../core/settings.service';
 import { toDateKey } from '../core/models';
 import type { Settings } from '../core/models';
 import { AccountPanel } from '../shared/account-panel';
+import { LanguageSelect } from '../shared/language-select';
+import { t } from '../core/i18n';
 
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule, AccountPanel, RouterLink],
+  imports: [FormsModule, AccountPanel, RouterLink, LanguageSelect],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',
 })
 export class SettingsPage {
+  protected readonly t = t;
   private readonly settingsService = inject(SettingsService);
   private readonly data = inject(DataService);
 
@@ -28,7 +31,7 @@ export class SettingsPage {
 
   protected async save(): Promise<void> {
     const d = this.draft();
-    await this.run('Cibles enregistrées.', () =>
+    await this.run(t('Cibles enregistrées.'), () =>
       this.settingsService.save({
         ...d,
         id: 'settings',
@@ -44,7 +47,7 @@ export class SettingsPage {
 
   /** Downloads the whole database as a JSON file the user can keep anywhere. */
   protected async exportJson(): Promise<void> {
-    await this.run('Sauvegarde exportée.', async () => {
+    await this.run(t('Sauvegarde exportée.'), async () => {
       const json = await this.data.exportJson();
       const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
       const link = document.createElement('a');
@@ -59,11 +62,11 @@ export class SettingsPage {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    if (!confirm('L’import remplace toutes les données actuelles. Continuer ?')) {
+    if (!confirm(t('L’import remplace toutes les données actuelles. Continuer ?'))) {
       input.value = '';
       return;
     }
-    await this.run('Données importées.', async () => {
+    await this.run(t('Données importées.'), async () => {
       await this.data.importJson(await file.text());
       this.draft.set({ ...this.settingsService.settings() });
     });
@@ -71,9 +74,9 @@ export class SettingsPage {
   }
 
   protected async reset(): Promise<void> {
-    if (!confirm('Effacer toutes les données et repartir des valeurs par défaut ?')) return;
-    if (!confirm('Dernière confirmation : cette action est irréversible.')) return;
-    await this.run('Données réinitialisées.', async () => {
+    if (!confirm(t('Effacer toutes les données et repartir des valeurs par défaut ?'))) return;
+    if (!confirm(t('Dernière confirmation : cette action est irréversible.'))) return;
+    await this.run(t('Données réinitialisées.'), async () => {
       await this.data.reset();
       this.draft.set({ ...this.settingsService.settings() });
     });
@@ -86,7 +89,7 @@ export class SettingsPage {
       await op();
       this.message.set(success);
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Une erreur est survenue.');
+      this.error.set(err instanceof Error ? err.message : t('Une erreur est survenue.'));
     }
   }
 }

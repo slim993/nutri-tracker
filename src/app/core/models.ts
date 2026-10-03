@@ -1,13 +1,14 @@
 import type { CoachProfile } from './coach';
+import { t } from './i18n';
 
 export type MealSlot = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'other';
 
 export const MEAL_SLOTS: { id: MealSlot; label: string }[] = [
-  { id: 'breakfast', label: 'Petit-déj' },
-  { id: 'lunch', label: 'Déjeuner' },
-  { id: 'snack', label: 'Collation' },
-  { id: 'dinner', label: 'Dîner' },
-  { id: 'other', label: 'Autre' },
+  { id: 'breakfast', label: t('Petit-déj') },
+  { id: 'lunch', label: t('Déjeuner') },
+  { id: 'snack', label: t('Collation') },
+  { id: 'dinner', label: t('Dîner') },
+  { id: 'other', label: t('Autre') },
 ];
 
 /** Macros for a given amount (already scaled, not per 100 g). */
@@ -95,9 +96,9 @@ export interface Settings {
 
 /** How the Claude prompts describe the user's aim, from where they are and where they want to be. */
 export function weightGoalLabel(currentKg: number, goalKg: number): string {
-  if (goalKg < currentKg) return 'perte de poids en préservant le muscle';
-  if (goalKg > currentKg) return 'prise de poids, surtout du muscle';
-  return 'maintien du poids';
+  if (goalKg < currentKg) return t('perte de poids en préservant le muscle');
+  if (goalKg > currentKg) return t('prise de poids, surtout du muscle');
+  return t('maintien du poids');
 }
 
 export const EMPTY_MACROS: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };

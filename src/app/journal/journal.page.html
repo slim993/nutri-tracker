@@ -1,14 +1,14 @@
 <header class="day">
-  <button class="nav" (click)="shift(-1)" aria-label="Jour précédent">‹</button>
+  <button class="nav" (click)="shift(-1)" [attr.aria-label]="t('Jour précédent')">‹</button>
   <div class="date">
     <h1>{{ prettyDate() }}</h1>
     <input type="date" [ngModel]="date()" (ngModelChange)="date.set($event)" />
   </div>
-  <button class="nav" (click)="shift(1)" aria-label="Jour suivant">›</button>
+  <button class="nav" (click)="shift(1)" [attr.aria-label]="t('Jour suivant')">›</button>
 </header>
 
 @if (!isToday()) {
-  <button class="btn today" (click)="today()">Revenir à aujourd'hui</button>
+  <button class="btn today" (click)="today()">{{ t('Revenir à aujourd’hui') }}</button>
 }
 
 <section class="card">
@@ -26,19 +26,21 @@
         <button class="entry-main" (click)="startEdit(item)">
           <span class="name">{{ item.foodName }}</span>
           <span class="muted">
-            {{ item.entry.grams }} g · {{ item.macros.kcal | number: '1.0-0' }} kcal ·
-            P {{ item.macros.protein | number: '1.0-0' }}
+            {{ item.entry.grams }} g · {{ item.macros.kcal | number: '1.0-0' }} kcal · P
+            {{ item.macros.protein | number: '1.0-0' }}
           </span>
         </button>
-        <button class="del" (click)="remove(item.entry.id)" aria-label="Supprimer">✕</button>
+        <button class="del" (click)="remove(item.entry.id)" [attr.aria-label]="t('Supprimer')">
+          ✕
+        </button>
       </div>
     }
   </section>
 } @empty {
-  <p class="empty">Rien de logué ce jour. Appuie sur « + » pour commencer.</p>
+  <p class="empty">{{ t('Rien de logué ce jour. Appuie sur « + » pour commencer.') }}</p>
 }
 
-<button class="fab" (click)="sheetSlot.set('other')" aria-label="Ajouter">+</button>
+<button class="fab" (click)="sheetSlot.set('other')" [attr.aria-label]="t('Ajouter')">+</button>
 
 @if (sheetSlot(); as slot) {
   <app-add-sheet [date]="date()" [initialSlot]="slot" (closed)="sheetSlot.set(null)" />
@@ -49,7 +51,7 @@
   <div class="edit-sheet">
     <h2>{{ item.foodName }}</h2>
     <div class="field">
-      <label for="edit-grams">Quantité (g)</label>
+      <label for="edit-grams">{{ t('Quantité (g)') }}</label>
       <input
         id="edit-grams"
         type="number"
@@ -60,8 +62,10 @@
       />
     </div>
     <div class="row">
-      <button class="btn btn-danger" (click)="remove(item.entry.id)">Supprimer</button>
-      <button class="btn btn-primary" style="flex: 1" (click)="saveEdit()">Enregistrer</button>
+      <button class="btn btn-danger" (click)="remove(item.entry.id)">{{ t('Supprimer') }}</button>
+      <button class="btn btn-primary" style="flex: 1" (click)="saveEdit()">
+        {{ t('Enregistrer') }}
+      </button>
     </div>
   </div>
 }

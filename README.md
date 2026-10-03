@@ -4,6 +4,9 @@ PWA Angular de suivi nutritionnel et de poids, **locale d'abord** : toutes les d
 l'IndexedDB du navigateur et l'app fonctionne hors ligne une fois installée. Un compte optionnel
 (Supabase) synchronise ces données entre appareils ; sans compte, rien ne quitte l'appareil.
 
+L'interface existe en **français et en anglais** : la langue du navigateur est prise par défaut
+et se change dans les Réglages.
+
 ## Fonctionnalités
 
 - **Journal** — navigation par jour, progression kcal/protéines/glucides/lipides vs cibles,

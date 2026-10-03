@@ -9,6 +9,7 @@ npm start                       # dev server, http://localhost:4200
 npm run build                   # production build → dist/nutri-tracker
 npm test                        # all unit tests (vitest via @angular/build:unit-test)
 npx ng test --include src/app/core/models.spec.ts    # a single spec file
+npm run check:i18n              # every t('…') literal has an English entry
 npx prettier --write .          # formatting (100 cols, single quotes, .prettierrc)
 ```
 
@@ -37,7 +38,7 @@ descriptions, tags or release notes. Commits are authored by the repo owner only
 
 ## Architecture
 
-Angular 22 standalone PWA, French UI / English code, **local-first**: the app reads and writes
+Angular 22 standalone PWA, French and English UI / English code, **local-first**: the app reads and writes
 the browser's IndexedDB only. The single network dependency is the optional Supabase account
 sync (see below); with no signed-in user the app makes no network calls at all.
 
@@ -107,6 +108,28 @@ copies into the Claude app, and parses the JSON plan Claude returns (pasted back
 Entraînement screen). When adding AI-assisted features (e.g. weekly meal planning), extend this
 bridge — do not add network calls or SDK dependencies. The parser must stay tolerant of prose
 around the fenced JSON block; it is covered by `claude-bridge.service.spec.ts`.
+
+### Languages (`core/i18n.ts`)
+
+French and English. **French is the source language and the lookup key**, gettext-style: every
+user-visible string goes through `t('Texte français')`, and `core/i18n.en.ts` maps it to
+English (a missing entry falls back to French). Use `{name}` placeholders with
+`t('… {n} …', { n })` rather than concatenating around values, and typographic `’` apostrophes
+in keys.
+
+- `LANG` is a module constant read once at startup (saved choice in `localStorage`, else the
+  browser language) and `setLang()` reloads the page. That is deliberate: module-level labels
+  (`MEAL_SLOTS`, route titles, chart labels) and `OnPush` templates can call `t()` directly.
+  Components expose it as `protected readonly t = t;` — do not name a local variable `t`.
+- Dates and sorting use `LOCALE` from the same module, never a hard-coded `'fr-FR'`.
+- Strings that reach `t()` through a variable — seed names, `dbTry()` labels, the programme
+  templates in `coach.ts` — are stored in French and translated at the point of use; their
+  English entries must be added to `i18n.en.ts` by hand.
+- `npm run check:i18n` fails when a literal passed to `t()` has no English entry; CI runs it.
+- Specs run in jsdom, whose browser language is English: a spec asserting on French text pins
+  the language first with `vi.hoisted(() => localStorage.setItem('nutri-lang', 'fr'))`.
+- The Claude prompts exist in both languages (`*PromptEn()` in the bridge); the JSON contract
+  is the same.
 
 ### Conventions
 

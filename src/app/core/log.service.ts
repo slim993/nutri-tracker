@@ -11,6 +11,7 @@ import {
   type Macros,
   type MealSlot,
 } from './models';
+import { t } from './i18n';
 
 export interface ResolvedEntry {
   entry: LogEntry;
@@ -45,7 +46,7 @@ export class LogService {
     const food = this.foods.get(entry.foodId);
     return {
       entry,
-      foodName: food?.name ?? 'Aliment supprimé',
+      foodName: food?.name ?? t('Aliment supprimé'),
       macros: food ? macrosFor(food, entry.grams) : EMPTY_MACROS,
     };
   }

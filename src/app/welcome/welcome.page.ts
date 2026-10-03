@@ -21,6 +21,8 @@ import { SettingsService } from '../core/settings.service';
 import { WeightService } from '../core/weight.service';
 import { WorkoutsService } from '../core/workouts.service';
 import { AccountPanel } from '../shared/account-panel';
+import { LanguageSelect } from '../shared/language-select';
+import { LOCALE, t } from '../core/i18n';
 
 type Step = 'questions' | 'proposal';
 
@@ -34,13 +36,14 @@ type Step = 'questions' | 'proposal';
  */
 @Component({
   selector: 'app-welcome',
-  imports: [FormsModule, AccountPanel, DecimalPipe, RouterLink],
+  imports: [FormsModule, AccountPanel, DecimalPipe, RouterLink, LanguageSelect],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './welcome.page.html',
   styleUrl: './welcome.page.scss',
   host: { '[class.standalone]': '!editing' },
 })
 export class WelcomePage {
+  protected readonly t = t;
   private readonly settings = inject(SettingsService);
   private readonly weight = inject(WeightService);
   private readonly workouts = inject(WorkoutsService);
@@ -144,7 +147,7 @@ export class WelcomePage {
   }
 
   protected dayLabel(dateKey: string): string {
-    return fromDateKey(dateKey).toLocaleDateString('fr-FR', { weekday: 'long' });
+    return fromDateKey(dateKey).toLocaleDateString(LOCALE, { weekday: 'long' });
   }
 
   protected async start(): Promise<void> {
@@ -172,7 +175,7 @@ export class WelcomePage {
       });
       if (this.editing) await this.router.navigateByUrl('/reglages');
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Une erreur est survenue.');
+      this.error.set(err instanceof Error ? err.message : t('Une erreur est survenue.'));
     } finally {
       this.busy.set(false);
     }

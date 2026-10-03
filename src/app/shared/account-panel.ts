@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SyncService } from '../core/sync.service';
+import { t } from '../core/i18n';
 
 /**
  * Sign-in / sign-up form and sync status. Renders nothing when no Supabase
@@ -14,58 +15,67 @@ import { SyncService } from '../core/sync.service';
   template: `
     @if (sync.available) {
       <section class="card">
-        <h2>Compte</h2>
+        <h2>{{ t('Compte') }}</h2>
         @if (flash(); as f) {
           <p class="flash" [class.ok]="f.ok" [class.ko]="!f.ok">{{ f.text }}</p>
         }
 
         @if (sync.email(); as email) {
-          <p class="muted hint">Connecté : {{ email }}</p>
+          <p class="muted hint">{{ t('Connecté : {email}', { email }) }}</p>
 
           @if (sync.needsReplace()) {
             <p class="hint">
-              Cet appareil contient déjà des données qui ne viennent pas de ce compte. Les
-              synchroniser les remplacera par celles du compte — exporte-les d'abord si tu veux les
-              garder.
+              {{
+                t(
+                  'Cet appareil contient déjà des données qui ne viennent pas de ce compte. Les synchroniser les remplacera par celles du compte — exporte-les d’abord si tu veux les garder.'
+                )
+              }}
             </p>
             <button class="btn btn-danger full" [disabled]="busy()" (click)="replace()">
-              Remplacer par les données du compte
+              {{ t('Remplacer par les données du compte') }}
             </button>
           } @else {
             <p class="muted hint">
               @switch (sync.status()) {
                 @case ('syncing') {
-                  Synchronisation…
+                  {{ t('Synchronisation…') }}
                 }
                 @case ('offline') {
-                  Hors ligne — la synchronisation reprendra avec le réseau.
+                  {{ t('Hors ligne — la synchronisation reprendra avec le réseau.') }}
                 }
                 @case ('error') {
                   {{ sync.error() }}
                 }
                 @default {
                   @if (sync.lastSyncAt(); as at) {
-                    Synchronisé à {{ at | date: 'HH:mm' }}.
+                    {{ t('Synchronisé à {time}.', { time: (at | date: 'HH:mm') ?? '' }) }}
                   } @else {
-                    En attente de synchronisation.
+                    {{ t('En attente de synchronisation.') }}
                   }
                 }
               }
             </p>
             <button class="btn full" [disabled]="busy()" (click)="syncNow()">
-              Synchroniser maintenant
+              {{ t('Synchroniser maintenant') }}
             </button>
           }
-          <button class="btn full" [disabled]="busy()" (click)="signOut()">Se déconnecter</button>
+          <button class="btn full" [disabled]="busy()" (click)="signOut()">
+            {{ t('Se déconnecter') }}
+          </button>
         } @else {
           <p class="muted hint">
-            Connecte-toi pour retrouver tes données sur tous tes appareils. Sans compte, tout reste
-            sur cet appareil.
+            {{
+              t(
+                'Connecte-toi pour retrouver tes données sur tous tes appareils. Sans compte, tout reste sur cet appareil.'
+              )
+            }}
           </p>
           @if (codeSentTo(); as sentTo) {
-            <p class="hint">Code envoyé à {{ sentTo }}. Il reste valable une heure.</p>
+            <p class="hint">
+              {{ t('Code envoyé à {email}. Il reste valable une heure.', { email: sentTo }) }}
+            </p>
             <div class="field">
-              <label for="account-code">Code reçu par e-mail</label>
+              <label for="account-code">{{ t('Code reçu par e-mail') }}</label>
               <input
                 id="account-code"
                 type="text"
@@ -76,14 +86,14 @@ import { SyncService } from '../core/sync.service';
               />
             </div>
             <button class="btn btn-primary full" [disabled]="!canVerify()" (click)="verify()">
-              Valider le code
+              {{ t('Valider le code') }}
             </button>
             <button class="btn full" [disabled]="busy()" (click)="changeEmail()">
-              Changer d'e-mail
+              {{ t('Changer d’e-mail') }}
             </button>
           } @else {
             <div class="field">
-              <label for="account-email">E-mail</label>
+              <label for="account-email">{{ t('E-mail') }}</label>
               <input
                 id="account-email"
                 type="email"
@@ -93,7 +103,7 @@ import { SyncService } from '../core/sync.service';
               />
             </div>
             <button class="btn btn-primary full" [disabled]="!canSend()" (click)="sendCode()">
-              Recevoir un code
+              {{ t('Recevoir un code') }}
             </button>
           }
         }
@@ -141,6 +151,7 @@ import { SyncService } from '../core/sync.service';
   `,
 })
 export class AccountPanel {
+  protected readonly t = t;
   protected readonly sync = inject(SyncService);
 
   protected readonly emailInput = signal('');
@@ -214,7 +225,7 @@ export class AccountPanel {
     } catch (err) {
       this.flash.set({
         ok: false,
-        text: err instanceof Error ? err.message : 'Une erreur est survenue.',
+        text: err instanceof Error ? err.message : t('Une erreur est survenue.'),
       });
     } finally {
       this.busy.set(false);

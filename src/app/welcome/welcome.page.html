@@ -1,4 +1,9 @@
-<h1>{{ editing ? 'Mon objectif' : 'Bienvenue 👋' }}</h1>
+<header class="top">
+  <h1>{{ editing ? t('Mon objectif') : t('Bienvenue 👋') }}</h1>
+  @if (!editing) {
+    <app-language-select />
+  }
+</header>
 
 @if (error(); as e) {
   <p class="flash ko">{{ e }}</p>
@@ -7,26 +12,34 @@
 @if (step() === 'questions') {
   <p class="muted intro">
     @if (editing) {
-      Mets à jour tes réponses pour recalculer tes cibles et, si tu veux, un nouveau programme de
-      {{ programWeeks }} semaines.
+      {{
+        t(
+          'Mets à jour tes réponses pour recalculer tes cibles et, si tu veux, un nouveau programme de {n} semaines.',
+          { n: programWeeks }
+        )
+      }}
     } @else {
-      Réponds à quelques questions : on calcule tes cibles et un programme de
-      {{ programWeeks }} semaines. Tout reste modifiable ensuite.
+      {{
+        t(
+          'Réponds à quelques questions : on calcule tes cibles et un programme de {n} semaines. Tout reste modifiable ensuite.',
+          { n: programWeeks }
+        )
+      }}
     }
   </p>
 
   <section class="card">
-    <h2>Toi</h2>
+    <h2>{{ t('Toi') }}</h2>
     <div class="grid">
       <div class="field">
-        <label for="w-sex">Sexe</label>
+        <label for="w-sex">{{ t('Sexe') }}</label>
         <select id="w-sex" [ngModel]="sex()" (ngModelChange)="sex.set($event)">
-          <option value="male">Homme</option>
-          <option value="female">Femme</option>
+          <option value="male">{{ t('Homme') }}</option>
+          <option value="female">{{ t('Femme') }}</option>
         </select>
       </div>
       <div class="field">
-        <label for="w-age">Âge</label>
+        <label for="w-age">{{ t('Âge') }}</label>
         <input
           id="w-age"
           type="number"
@@ -36,7 +49,7 @@
         />
       </div>
       <div class="field">
-        <label for="w-height">Taille (cm)</label>
+        <label for="w-height">{{ t('Taille (cm)') }}</label>
         <input
           id="w-height"
           type="number"
@@ -46,7 +59,7 @@
         />
       </div>
       <div class="field">
-        <label for="w-current">Poids actuel (kg)</label>
+        <label for="w-current">{{ t('Poids actuel (kg)') }}</label>
         <input
           id="w-current"
           type="number"
@@ -58,7 +71,7 @@
       </div>
     </div>
     <div class="field">
-      <label for="w-activity">Activité au quotidien (hors sport)</label>
+      <label for="w-activity">{{ t('Activité au quotidien (hors sport)') }}</label>
       <select id="w-activity" [ngModel]="activity()" (ngModelChange)="activity.set($event)">
         @for (a of activityLevels; track a.id) {
           <option [value]="a.id">{{ a.label }}</option>
@@ -66,10 +79,10 @@
       </select>
     </div>
 
-    <h2>Ton objectif</h2>
+    <h2>{{ t('Ton objectif') }}</h2>
     <div class="grid">
       <div class="field">
-        <label for="w-goal">Poids objectif (kg)</label>
+        <label for="w-goal">{{ t('Poids objectif (kg)') }}</label>
         <input
           id="w-goal"
           type="number"
@@ -80,7 +93,7 @@
         />
       </div>
       <div class="field">
-        <label for="w-pace">Rythme</label>
+        <label for="w-pace">{{ t('Rythme') }}</label>
         <select id="w-pace" [ngModel]="pace()" (ngModelChange)="pace.set($event)">
           @for (p of paces; track p.id) {
             <option [value]="p.id">{{ p.label }}</option>
@@ -89,10 +102,10 @@
       </div>
     </div>
 
-    <h2>Ton entraînement</h2>
+    <h2>{{ t('Ton entraînement') }}</h2>
     <div class="grid">
       <div class="field">
-        <label for="w-sessions">Séances par semaine</label>
+        <label for="w-sessions">{{ t('Séances par semaine') }}</label>
         <select
           id="w-sessions"
           [ngModel]="sessionsPerWeek()"
@@ -104,29 +117,29 @@
         </select>
       </div>
       <div class="field">
-        <label for="w-level">Niveau</label>
+        <label for="w-level">{{ t('Niveau') }}</label>
         <select id="w-level" [ngModel]="level()" (ngModelChange)="level.set($event)">
-          <option value="beginner">Débutant</option>
-          <option value="intermediate">Habitué</option>
+          <option value="beginner">{{ t('Débutant') }}</option>
+          <option value="intermediate">{{ t('Habitué') }}</option>
         </select>
       </div>
     </div>
     <div class="field">
-      <label for="w-equipment">Matériel</label>
+      <label for="w-equipment">{{ t('Matériel') }}</label>
       <select id="w-equipment" [ngModel]="equipment()" (ngModelChange)="equipment.set($event)">
-        <option value="gym">Salle de sport</option>
-        <option value="none">Aucun (poids du corps)</option>
+        <option value="gym">{{ t('Salle de sport') }}</option>
+        <option value="none">{{ t('Aucun (poids du corps)') }}</option>
       </select>
     </div>
 
     <button class="btn btn-primary full" [disabled]="!canCompute()" (click)="compute()">
-      Calculer mon programme
+      {{ t('Calculer mon programme') }}
     </button>
     <button class="btn full" (click)="skip()">
-      {{ editing ? 'Modifier mes cibles à la main' : 'Je connais déjà mes cibles' }}
+      {{ editing ? t('Modifier mes cibles à la main') : t('Je connais déjà mes cibles') }}
     </button>
     @if (editing) {
-      <a class="btn full" routerLink="/reglages">Annuler</a>
+      <a class="btn full" routerLink="/reglages">{{ t('Annuler') }}</a>
     }
   </section>
 
@@ -136,30 +149,44 @@
 } @else {
   @if (plan(); as p) {
     <section class="card">
-      <h2>Ton plan</h2>
+      <h2>{{ t('Ton plan') }}</h2>
       <p class="hint">
-        Ton maintien est estimé à {{ p.targets.maintenanceKcal }} kcal par jour.
+        {{
+          t('Ton maintien est estimé à {kcal} kcal par jour.', { kcal: p.targets.maintenanceKcal })
+        }}
         @if (p.targets.weeklyChangeKg !== 0) {
-          Avec {{ p.targets.kcal }} kcal, tu vises environ
-          {{ p.targets.weeklyChangeKg | number: '1.1-2' }} kg par semaine.
+          {{
+            t('Avec {kcal} kcal, tu vises environ {kg} kg par semaine.', {
+              kcal: p.targets.kcal,
+              kg: (p.targets.weeklyChangeKg | number: '1.1-2') ?? '',
+            })
+          }}
           @if (p.weeks) {
-            À ce rythme, {{ goalKg() }} kg dans {{ p.weeks }} semaines environ.
+            {{
+              t('À ce rythme, {kg} kg dans {weeks} semaines environ.', {
+                kg: goalKg() ?? '',
+                weeks: p.weeks,
+              })
+            }}
           }
         } @else {
-          Tes cibles sont réglées pour garder ton poids.
+          {{ t('Tes cibles sont réglées pour garder ton poids.') }}
         }
       </p>
       <p class="muted hint">
-        Estimation indicative, pas un avis médical : ajuste selon ta pesée au fil des semaines et
-        demande conseil à un professionnel de santé en cas de doute.
+        {{
+          t(
+            'Estimation indicative, pas un avis médical : ajuste selon ta pesée au fil des semaines et demande conseil à un professionnel de santé en cas de doute.'
+          )
+        }}
       </p>
     </section>
   } @else {
     <section class="card">
-      <h2>Ton poids</h2>
+      <h2>{{ t('Ton poids') }}</h2>
       <div class="grid">
         <div class="field">
-          <label for="w-current">Poids actuel (kg)</label>
+          <label for="w-current">{{ t('Poids actuel (kg)') }}</label>
           <input
             id="w-current"
             type="number"
@@ -170,7 +197,7 @@
           />
         </div>
         <div class="field">
-          <label for="w-goal">Poids objectif (kg)</label>
+          <label for="w-goal">{{ t('Poids objectif (kg)') }}</label>
           <input
             id="w-goal"
             type="number"
@@ -185,14 +212,17 @@
   }
 
   <section class="card">
-    <h2>Tes cibles quotidiennes</h2>
+    <h2>{{ t('Tes cibles quotidiennes') }}</h2>
     <p class="muted hint">
-      {{ plan() ? 'Calculées d’après tes réponses' : 'Valeurs indicatives' }} : ajuste-les si
-      besoin.
+      {{
+        plan()
+          ? t('Calculées d’après tes réponses : ajuste-les si besoin.')
+          : t('Valeurs indicatives : ajuste-les si besoin.')
+      }}
     </p>
     <div class="grid">
       <div class="field">
-        <label for="w-kcal">Calories</label>
+        <label for="w-kcal">{{ t('Calories') }}</label>
         <input
           id="w-kcal"
           type="number"
@@ -202,7 +232,7 @@
         />
       </div>
       <div class="field">
-        <label for="w-prot">Protéines (g)</label>
+        <label for="w-prot">{{ t('Protéines (g)') }}</label>
         <input
           id="w-prot"
           type="number"
@@ -212,7 +242,7 @@
         />
       </div>
       <div class="field">
-        <label for="w-carb">Glucides (g)</label>
+        <label for="w-carb">{{ t('Glucides (g)') }}</label>
         <input
           id="w-carb"
           type="number"
@@ -222,7 +252,7 @@
         />
       </div>
       <div class="field">
-        <label for="w-fat">Lipides (g)</label>
+        <label for="w-fat">{{ t('Lipides (g)') }}</label>
         <input
           id="w-fat"
           type="number"
@@ -236,10 +266,14 @@
 
   @if (plan()) {
     <section class="card">
-      <h2>Ton programme de {{ programWeeks }} semaines</h2>
+      <h2>{{ t('Ton programme de {n} semaines', { n: programWeeks }) }}</h2>
       <p class="muted hint">
-        {{ program().length }} séances à partir d'aujourd'hui. Voici la première semaine ; les
-        suivantes reprennent le même schéma avec plus de séries.
+        {{
+          t(
+            '{n} séances à partir d’aujourd’hui. Voici la première semaine ; les suivantes reprennent le même schéma avec plus de séries.',
+            { n: program().length }
+          )
+        }}
       </p>
       @for (session of firstWeek(); track session.date) {
         <div class="session">
@@ -253,13 +287,15 @@
       }
       <label class="check">
         <input type="checkbox" [ngModel]="addProgram()" (ngModelChange)="addProgram.set($event)" />
-        Ajouter ce programme à l'onglet Sport
+        {{ t('Ajouter ce programme à l’onglet Sport') }}
       </label>
     </section>
   }
 
   <button class="btn btn-primary full" [disabled]="!canStart()" (click)="start()">
-    {{ editing ? 'Enregistrer' : 'Commencer' }}
+    {{ editing ? t('Enregistrer') : t('Commencer') }}
   </button>
-  <button class="btn full" [disabled]="busy()" (click)="step.set('questions')">Retour</button>
+  <button class="btn full" [disabled]="busy()" (click)="step.set('questions')">
+    {{ t('Retour') }}
+  </button>
 }

@@ -1,4 +1,5 @@
 import { shiftDateKey, type Workout, type WorkoutExercise } from './models';
+import { t } from './i18n';
 
 export type Sex = 'male' | 'female';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active';
@@ -32,16 +33,16 @@ export interface CoachTargets {
 }
 
 export const ACTIVITY_LEVELS: { id: ActivityLevel; label: string; factor: number }[] = [
-  { id: 'sedentary', label: 'Sédentaire (bureau, peu de marche)', factor: 1.2 },
-  { id: 'light', label: 'Légèrement actif (marche quotidienne)', factor: 1.375 },
-  { id: 'moderate', label: 'Actif (travail debout, sport régulier)', factor: 1.55 },
-  { id: 'active', label: 'Très actif (travail physique)', factor: 1.725 },
+  { id: 'sedentary', label: t('Sédentaire (bureau, peu de marche)'), factor: 1.2 },
+  { id: 'light', label: t('Légèrement actif (marche quotidienne)'), factor: 1.375 },
+  { id: 'moderate', label: t('Actif (travail debout, sport régulier)'), factor: 1.55 },
+  { id: 'active', label: t('Très actif (travail physique)'), factor: 1.725 },
 ];
 
 export const PACES: { id: Pace; label: string; kgPerWeek: number }[] = [
-  { id: 'slow', label: 'Doux', kgPerWeek: 0.25 },
-  { id: 'moderate', label: 'Modéré', kgPerWeek: 0.5 },
-  { id: 'fast', label: 'Soutenu', kgPerWeek: 0.75 },
+  { id: 'slow', label: t('Doux'), kgPerWeek: 0.25 },
+  { id: 'moderate', label: t('Modéré'), kgPerWeek: 0.5 },
+  { id: 'fast', label: t('Soutenu'), kgPerWeek: 0.75 },
 ];
 
 export const PROGRAM_WEEKS = 4;
@@ -207,15 +208,16 @@ export function buildProgram(profile: CoachProfile, startDate: string): Omit<Wor
     const sets = setsFor(profile.level, week);
     for (const day of SESSION_DAYS[profile.sessionsPerWeek]) {
       const template = templates[program.length % templates.length];
+      // Templates are written in French and translated here, when the programme is built.
       const exercises: WorkoutExercise[] = template.exercises.map(([name, reps]) => ({
-        name,
+        name: t(name),
         sets,
-        reps,
+        reps: t(reps),
       }));
-      if (losing) exercises.push({ name: 'Marche rapide', sets: 1, reps: '20 min' });
+      if (losing) exercises.push({ name: t('Marche rapide'), sets: 1, reps: '20 min' });
       program.push({
         date: shiftDateKey(startDate, (week - 1) * 7 + day),
-        name: `S${week} · ${template.name}`,
+        name: t('S{week} · {name}', { week, name: t(template.name) }),
         exercises,
         done: false,
       });

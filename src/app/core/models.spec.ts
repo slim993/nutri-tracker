@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { macrosFor, shiftDateKey, sumMacros, toDateKey, weightGoalLabel } from './models';
+
+// These assertions read French text: pin the language before the modules under test load.
+vi.hoisted(() => localStorage.setItem('nutri-lang', 'fr'));
 
 describe('weightGoalLabel', () => {
   it('follows the direction from current weight to goal', () => {

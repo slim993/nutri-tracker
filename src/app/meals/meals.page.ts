@@ -7,6 +7,7 @@ import { LogService } from '../core/log.service';
 import { MealsService } from '../core/meals.service';
 import { ClaudePanel } from '../shared/claude-panel';
 import { macrosFor, sumMacros, type Macros, type Meal, type MealItem } from '../core/models';
+import { t } from '../core/i18n';
 
 type Draft = Omit<Meal, 'id'> & { id?: string };
 
@@ -18,6 +19,7 @@ type Draft = Omit<Meal, 'id'> & { id?: string };
   styleUrl: './meals.page.scss',
 })
 export class MealsPage {
+  protected readonly t = t;
   protected readonly meals = inject(MealsService);
   protected readonly foods = inject(FoodsService);
   private readonly claude = inject(ClaudeBridgeService);
@@ -32,10 +34,13 @@ export class MealsPage {
     if (
       conflicting.length > 0 &&
       !confirm(
-        `Le journal contient déjà des entrées pour ${conflicting.length} jour(s) du plan. Les remplacer par le plan ?`,
+        t(
+          'Le journal contient déjà des entrées pour {n} jour(s) du plan. Les remplacer par le plan ?',
+          { n: conflicting.length },
+        ),
       )
     ) {
-      throw new Error('Import annulé.');
+      throw new Error(t('Import annulé.'));
     }
     return this.claude.applyMealPlan(plan, conflicting);
   };
@@ -83,9 +88,7 @@ export class MealsPage {
   }
 
   protected removeItem(index: number): void {
-    this.draft.update((d) =>
-      d ? { ...d, items: d.items.filter((_, i) => i !== index) } : d,
-    );
+    this.draft.update((d) => (d ? { ...d, items: d.items.filter((_, i) => i !== index) } : d));
   }
 
   protected itemMacros(item: MealItem): Macros {
@@ -103,7 +106,7 @@ export class MealsPage {
   }
 
   protected async remove(id: string): Promise<void> {
-    if (!confirm('Supprimer ce repas type ?')) return;
+    if (!confirm(t('Supprimer ce repas type ?'))) return;
     await this.meals.remove(id);
     this.draft.set(null);
   }

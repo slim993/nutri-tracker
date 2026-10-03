@@ -1,4 +1,4 @@
-<h1>Réglages</h1>
+<h1>{{ t('Réglages') }}</h1>
 
 @if (message(); as m) {
   <p class="flash ok">{{ m }}</p>
@@ -8,53 +8,101 @@
 }
 
 <section class="card">
-  <h2>Cibles quotidiennes</h2>
+  <h2>{{ t('Cibles quotidiennes') }}</h2>
   <div class="grid">
     <div class="field">
-      <label for="kcal">Calories</label>
-      <input id="kcal" type="number" inputmode="numeric" [ngModel]="draft().kcalTarget" (ngModelChange)="patch('kcalTarget', $event)" />
+      <label for="kcal">{{ t('Calories') }}</label>
+      <input
+        id="kcal"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="draft().kcalTarget"
+        (ngModelChange)="patch('kcalTarget', $event)"
+      />
     </div>
     <div class="field">
-      <label for="prot">Protéines (g)</label>
-      <input id="prot" type="number" inputmode="numeric" [ngModel]="draft().proteinTarget" (ngModelChange)="patch('proteinTarget', $event)" />
+      <label for="prot">{{ t('Protéines (g)') }}</label>
+      <input
+        id="prot"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="draft().proteinTarget"
+        (ngModelChange)="patch('proteinTarget', $event)"
+      />
     </div>
     <div class="field">
-      <label for="carb">Glucides (g)</label>
-      <input id="carb" type="number" inputmode="numeric" [ngModel]="draft().carbsTarget" (ngModelChange)="patch('carbsTarget', $event)" />
+      <label for="carb">{{ t('Glucides (g)') }}</label>
+      <input
+        id="carb"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="draft().carbsTarget"
+        (ngModelChange)="patch('carbsTarget', $event)"
+      />
     </div>
     <div class="field">
-      <label for="fat">Lipides (g)</label>
-      <input id="fat" type="number" inputmode="numeric" [ngModel]="draft().fatTarget" (ngModelChange)="patch('fatTarget', $event)" />
+      <label for="fat">{{ t('Lipides (g)') }}</label>
+      <input
+        id="fat"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="draft().fatTarget"
+        (ngModelChange)="patch('fatTarget', $event)"
+      />
     </div>
     <div class="field">
-      <label for="start">Poids de départ (kg)</label>
-      <input id="start" type="number" inputmode="decimal" step="0.1" [ngModel]="draft().startWeightKg" (ngModelChange)="patch('startWeightKg', $event)" />
+      <label for="start">{{ t('Poids de départ (kg)') }}</label>
+      <input
+        id="start"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        [ngModel]="draft().startWeightKg"
+        (ngModelChange)="patch('startWeightKg', $event)"
+      />
     </div>
     <div class="field">
-      <label for="goal">Poids objectif (kg)</label>
-      <input id="goal" type="number" inputmode="decimal" step="0.1" [ngModel]="draft().weightGoalKg" (ngModelChange)="patch('weightGoalKg', $event)" />
+      <label for="goal">{{ t('Poids objectif (kg)') }}</label>
+      <input
+        id="goal"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        [ngModel]="draft().weightGoalKg"
+        (ngModelChange)="patch('weightGoalKg', $event)"
+      />
     </div>
   </div>
-  <button class="btn btn-primary full" (click)="save()">Enregistrer</button>
-  <a class="btn full" routerLink="/objectif">Recalculer avec le questionnaire</a>
+  <button class="btn btn-primary full" (click)="save()">{{ t('Enregistrer') }}</button>
+  <a class="btn full" routerLink="/objectif">{{ t('Recalculer avec le questionnaire') }}</a>
 </section>
 
 <app-account-panel />
 
 <section class="card">
-  <h2>Sauvegarde</h2>
+  <h2>{{ t('Langue') }}</h2>
+  <app-language-select />
+</section>
+
+<section class="card">
+  <h2>{{ t('Sauvegarde') }}</h2>
   <p class="muted hint">
-    Sans compte connecté, tout est stocké dans ce navigateur uniquement. Exporte régulièrement
-    pour ne rien perdre.
+    {{
+      t(
+        'Sans compte connecté, tout est stocké dans ce navigateur uniquement. Exporte régulièrement pour ne rien perdre.'
+      )
+    }}
   </p>
-  <button class="btn full" (click)="exportJson()">Exporter en JSON</button>
+  <button class="btn full" (click)="exportJson()">{{ t('Exporter en JSON') }}</button>
   <label class="btn full import">
-    Importer un JSON
+    {{ t('Importer un JSON') }}
     <input type="file" accept="application/json,.json" (change)="importJson($event)" />
   </label>
 </section>
 
 <section class="card">
-  <h2>Zone rouge</h2>
-  <button class="btn btn-danger full" (click)="reset()">Réinitialiser toutes les données</button>
+  <h2>{{ t('Zone rouge') }}</h2>
+  <button class="btn btn-danger full" (click)="reset()">
+    {{ t('Réinitialiser toutes les données') }}
+  </button>
 </section>

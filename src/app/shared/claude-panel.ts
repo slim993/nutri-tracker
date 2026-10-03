@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { t } from '../core/i18n';
 
 /**
  * The copy/paste bridge UI: "copy context" + "import plan" around a prompt
@@ -16,12 +17,18 @@ import { FormsModule } from '@angular/forms';
     <section class="card">
       <h2>{{ title() }}</h2>
       <p class="muted hint">
-        1. Copie ton contexte · 2. Colle-le dans l'app Claude · 3. Importe le JSON de sa réponse.
+        {{
+          t(
+            '1. Copie ton contexte · 2. Colle-le dans l’app Claude · 3. Importe le JSON de sa réponse.'
+          )
+        }}
       </p>
       <div class="row">
-        <button class="btn" style="flex: 1" (click)="copyContext()">📋 Copier le contexte</button>
+        <button class="btn" style="flex: 1" (click)="copyContext()">
+          {{ t('📋 Copier le contexte') }}
+        </button>
         <button class="btn" style="flex: 1" (click)="importOpen.set(true)">
-          📥 Importer le plan
+          {{ t('📥 Importer le plan') }}
         </button>
       </div>
     </section>
@@ -29,22 +36,22 @@ import { FormsModule } from '@angular/forms';
     @if (importOpen()) {
       <div class="backdrop" (click)="importOpen.set(false)"></div>
       <div class="sheet">
-        <h2>Importer le plan de Claude</h2>
-        <p class="muted hint">Colle ici la réponse de Claude (avec son bloc JSON).</p>
+        <h2>{{ t('Importer le plan de Claude') }}</h2>
+        <p class="muted hint">{{ t('Colle ici la réponse de Claude (avec son bloc JSON).') }}</p>
         <textarea
           rows="8"
           [ngModel]="importText()"
           (ngModelChange)="importText.set($event)"
         ></textarea>
         <div class="row">
-          <button class="btn" (click)="importOpen.set(false)">Annuler</button>
+          <button class="btn" (click)="importOpen.set(false)">{{ t('Annuler') }}</button>
           <button
             class="btn btn-primary"
             style="flex: 1"
             [disabled]="!importText().trim() || busy()"
             (click)="runImport()"
           >
-            {{ busy() ? 'Import…' : 'Importer' }}
+            {{ busy() ? t('Import…') : t('Importer') }}
           </button>
         </div>
       </div>
@@ -121,7 +128,8 @@ import { FormsModule } from '@angular/forms';
   `,
 })
 export class ClaudePanel {
-  readonly title = input('Programmer avec Claude');
+  protected readonly t = t;
+  readonly title = input(t('Programmer avec Claude'));
   readonly buildPrompt = input.required<() => string>();
   /** Runs the import; resolves to a success message, throws a user-readable error. */
   readonly doImport = input.required<(text: string) => Promise<string>>();
@@ -135,12 +143,15 @@ export class ClaudePanel {
     const prompt = this.buildPrompt()();
     try {
       await navigator.clipboard.writeText(prompt);
-      this.notify(true, 'Contexte copié. Colle-le dans Claude, puis importe le JSON reçu.');
+      this.notify(true, t('Contexte copié. Colle-le dans Claude, puis importe le JSON reçu.'));
     } catch {
       // Clipboard can be denied — surface the text for manual copy instead.
       this.importText.set(prompt);
       this.importOpen.set(true);
-      this.notify(false, 'Copie refusée par le navigateur : copie le texte ci-dessous à la main.');
+      this.notify(
+        false,
+        t('Copie refusée par le navigateur : copie le texte ci-dessous à la main.'),
+      );
     }
   }
 
@@ -152,7 +163,7 @@ export class ClaudePanel {
       this.importText.set('');
       this.notify(true, message);
     } catch (err) {
-      this.notify(false, err instanceof Error ? err.message : 'Import impossible.');
+      this.notify(false, err instanceof Error ? err.message : t('Import impossible.'));
     } finally {
       this.busy.set(false);
     }

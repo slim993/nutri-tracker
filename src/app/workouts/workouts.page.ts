@@ -11,6 +11,7 @@ import {
   type Workout,
   type WorkoutExercise,
 } from '../core/models';
+import { LOCALE, t } from '../core/i18n';
 
 type Draft = Omit<Workout, 'id'> & { id?: string };
 
@@ -29,6 +30,7 @@ function weekStart(date: string): string {
   styleUrl: './workouts.page.scss',
 })
 export class WorkoutsPage {
+  protected readonly t = t;
   protected readonly workouts = inject(WorkoutsService);
   private readonly claude = inject(ClaudeBridgeService);
 
@@ -43,13 +45,13 @@ export class WorkoutsPage {
     const sessions = this.claude.parseWorkoutPlan(text);
     await this.workouts.createMany(sessions);
     this.weekOf.set(weekStart(sessions[0].date));
-    return `${sessions.length} séance(s) importée(s).`;
+    return t('{n} séance(s) importée(s).', { n: sessions.length });
   };
 
   protected readonly weekLabel = computed(() => {
     const start = fromDateKey(this.weekOf());
     const end = fromDateKey(shiftDateKey(this.weekOf(), 6));
-    const fmt = (d: Date) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const fmt = (d: Date) => d.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
     return `${fmt(start)} – ${fmt(end)}`;
   });
 
@@ -62,7 +64,7 @@ export class WorkoutsPage {
   }
 
   protected pretty(date: string): string {
-    return fromDateKey(date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric' });
+    return fromDateKey(date).toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric' });
   }
 
   protected exerciseLabel(e: WorkoutExercise): string {
@@ -199,7 +201,7 @@ export class WorkoutsPage {
   }
 
   protected async remove(id: string): Promise<void> {
-    if (!confirm('Supprimer cette séance ?')) return;
+    if (!confirm(t('Supprimer cette séance ?'))) return;
     await this.workouts.remove(id);
     this.draft.set(null);
   }

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import type { Macros } from '../core/models';
+import { t } from '../core/i18n';
 
 interface Bar {
   key: string;
@@ -31,9 +32,9 @@ interface Bar {
           <div class="track"><div class="fill" [style.width.%]="bar.ratio * 100"></div></div>
           <div class="foot muted">
             @if (bar.remaining >= 0) {
-              reste {{ bar.remaining | number: '1.0-0' }}{{ bar.unit }}
+              {{ t('reste') }} {{ bar.remaining | number: '1.0-0' }}{{ bar.unit }}
             } @else {
-              dépassé de {{ -bar.remaining | number: '1.0-0' }}{{ bar.unit }}
+              {{ t('dépassé de') }} {{ -bar.remaining | number: '1.0-0' }}{{ bar.unit }}
             }
           </div>
         </div>
@@ -78,17 +79,18 @@ interface Bar {
   `,
 })
 export class MacroProgress {
+  protected readonly t = t;
   readonly consumed = input.required<Macros>();
   readonly targets = input.required<Macros>();
 
   protected readonly bars = computed<Bar[]>(() => {
     const c = this.consumed();
-    const t = this.targets();
+    const goal = this.targets();
     const defs: [string, string, string, number, number][] = [
-      ['kcal', 'Calories', ' kcal', c.kcal, t.kcal],
-      ['protein', 'Protéines', ' g', c.protein, t.protein],
-      ['carbs', 'Glucides', ' g', c.carbs, t.carbs],
-      ['fat', 'Lipides', ' g', c.fat, t.fat],
+      ['kcal', t('Calories'), ' kcal', c.kcal, goal.kcal],
+      ['protein', t('Protéines'), ' g', c.protein, goal.protein],
+      ['carbs', t('Glucides'), ' g', c.carbs, goal.carbs],
+      ['fat', t('Lipides'), ' g', c.fat, goal.fat],
     ];
     return defs.map(([key, label, unit, consumed, target]) => ({
       key,

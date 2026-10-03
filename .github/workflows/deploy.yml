@@ -24,6 +24,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run check:i18n
       - run: npx ng test --watch=false
       - run: npm run build:pages
       # GitHub Pages has no SPA rewrite: 404.html makes deep links boot the app.

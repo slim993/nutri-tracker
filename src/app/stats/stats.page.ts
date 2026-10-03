@@ -7,6 +7,7 @@ import { SettingsService } from '../core/settings.service';
 import { WeightService } from '../core/weight.service';
 import { fromDateKey, toDateKey } from '../core/models';
 import { BAR_CHART_OPTIONS, LINE_CHART_OPTIONS } from '../shared/chart-defaults';
+import { LOCALE, t } from '../core/i18n';
 
 /** Monday of the ISO week containing `date`, as a date key. */
 function weekStart(date: string): string {
@@ -26,6 +27,7 @@ const MS_PER_WEEK = 7 * 24 * 3600 * 1000;
   styleUrl: './stats.page.scss',
 })
 export class StatsPage {
+  protected readonly t = t;
   private readonly log = inject(LogService);
   private readonly weight = inject(WeightService);
   private readonly settingsService = inject(SettingsService);
@@ -67,12 +69,12 @@ export class StatsPage {
     const weeks = this.weeklyKcal();
     return {
       labels: weeks.map((w) =>
-        fromDateKey(w.week).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+        fromDateKey(w.week).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit' }),
       ),
       datasets: [
         {
           data: weeks.map((w) => w.average),
-          label: 'kcal / jour',
+          label: t('kcal / jour'),
           backgroundColor: '#f59e0b',
           borderRadius: 6,
         },
@@ -86,12 +88,12 @@ export class StatsPage {
     const days = this.dailyTotals().slice(-30);
     return {
       labels: days.map((d) =>
-        fromDateKey(d.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+        fromDateKey(d.date).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit' }),
       ),
       datasets: [
         {
           data: days.map((d) => (d.protein >= target ? 1 : 0)),
-          label: 'Cible protéines atteinte',
+          label: t('Cible protéines atteinte'),
           backgroundColor: days.map((d) => (d.protein >= target ? '#60a5fa' : '#2a2f3a')),
           borderRadius: 4,
         },
@@ -111,19 +113,19 @@ export class StatsPage {
     const smoothed = this.weight.movingAverage();
     return {
       labels: raw.map((e) =>
-        fromDateKey(e.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+        fromDateKey(e.date).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit' }),
       ),
       datasets: [
         {
           data: raw.map((e) => e.weightKg),
-          label: 'Poids',
+          label: t('Poids'),
           borderColor: 'rgba(154, 161, 177, 0.5)',
           pointRadius: 2,
           fill: false,
         },
         {
           data: smoothed.map((e) => e.weightKg),
-          label: 'Moyenne 7 j',
+          label: t('Moyenne 7 j'),
           borderColor: '#4ade80',
           borderWidth: 2.5,
           pointRadius: 0,
@@ -160,7 +162,7 @@ export class StatsPage {
     if (remaining <= 0) return null;
     const date = fromDateKey(last.date);
     date.setDate(date.getDate() + Math.ceil((remaining / rate) * 7));
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
   });
 
   protected readonly hasLogs = computed(() => this.dailyTotals().length > 0);

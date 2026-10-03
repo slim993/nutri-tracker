@@ -8,6 +8,7 @@ import { SettingsService } from './settings.service';
 import { WeightService } from './weight.service';
 import { WorkoutsService } from './workouts.service';
 import type { Food, LogEntry, Meal, Settings, WeightEntry, Workout } from './models';
+import { t } from './i18n';
 
 export interface BackupFile {
   app: 'nutri-tracker';
@@ -45,7 +46,9 @@ export class DataService {
       this.error.set(
         err instanceof DbError
           ? err.message
-          : 'Impossible de charger les données locales. Vérifie que le stockage du navigateur est autorisé.',
+          : t(
+              'Impossible de charger les données locales. Vérifie que le stockage du navigateur est autorisé.',
+            ),
       );
       this.ready.set(true);
     }
@@ -85,10 +88,10 @@ export class DataService {
     try {
       backup = JSON.parse(json);
     } catch {
-      throw new Error('Fichier illisible : ce n’est pas du JSON valide.');
+      throw new Error(t('Fichier illisible : ce n’est pas du JSON valide.'));
     }
     if (backup?.app !== 'nutri-tracker' || !Array.isArray(backup.foods)) {
-      throw new Error('Ce fichier n’est pas une sauvegarde Nutri-Tracker.');
+      throw new Error(t('Ce fichier n’est pas une sauvegarde Nutri-Tracker.'));
     }
 
     const db = await getDb();

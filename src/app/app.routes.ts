@@ -1,46 +1,47 @@
 import { Routes } from '@angular/router';
+import { t } from './core/i18n';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'journal' },
   {
     path: 'journal',
-    title: 'Journal',
+    title: t('Journal'),
     loadComponent: () => import('./journal/journal.page').then((m) => m.JournalPage),
   },
   {
     path: 'aliments',
-    title: 'Aliments',
+    title: t('Aliments'),
     loadComponent: () => import('./foods/foods.page').then((m) => m.FoodsPage),
   },
   {
     path: 'repas',
-    title: 'Repas types',
+    title: t('Repas types'),
     loadComponent: () => import('./meals/meals.page').then((m) => m.MealsPage),
   },
   {
     path: 'poids',
-    title: 'Poids',
+    title: t('Poids'),
     loadComponent: () => import('./weight/weight.page').then((m) => m.WeightPage),
   },
   {
     path: 'entrainement',
-    title: 'Entraînement',
+    title: t('Entraînement'),
     loadComponent: () => import('./workouts/workouts.page').then((m) => m.WorkoutsPage),
   },
   {
     path: 'stats',
-    title: 'Statistiques',
+    title: t('Statistiques'),
     loadComponent: () => import('./stats/stats.page').then((m) => m.StatsPage),
   },
   {
     path: 'reglages',
-    title: 'Réglages',
+    title: t('Réglages'),
     loadComponent: () => import('./settings/settings.page').then((m) => m.SettingsPage),
   },
   {
     // Not in the tab bar: reached from Réglages to redo the questionnaire.
     path: 'objectif',
-    title: 'Mon objectif',
+    title: t('Mon objectif'),
     loadComponent: () => import('./welcome/welcome.page').then((m) => m.WelcomePage),
   },
   { path: '**', redirectTo: 'journal' },

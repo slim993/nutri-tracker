@@ -1,46 +1,51 @@
-<h1>Poids</h1>
+<h1>{{ t('Poids') }}</h1>
 
 <section class="card stats">
   <div>
-    <span class="muted">Actuel</span>
+    <span class="muted">{{ t('Actuel') }}</span>
     <strong>{{ current() | number: '1.1-1' }} kg</strong>
   </div>
   <div>
-    <span class="muted">Depuis le début</span>
+    <span class="muted">{{ t('Depuis le début') }}</span>
     <strong [class.good]="sinceStart() < 0">
       {{ sinceStart() > 0 ? '+' : '' }}{{ sinceStart() | number: '1.1-1' }} kg
     </strong>
   </div>
   <div>
-    <span class="muted">Reste</span>
+    <span class="muted">{{ t('Reste') }}</span>
     <strong>{{ toGoal() | number: '1.1-1' }} kg</strong>
   </div>
 </section>
 
 <section class="card">
-  <h2>Évolution</h2>
+  <h2>{{ t('Évolution') }}</h2>
   <div class="chart">
     <canvas baseChart type="line" [data]="chartData()" [options]="chartOptions"></canvas>
   </div>
   <p class="muted legend">
-    Ligne pointillée = objectif {{ settings().weightGoalKg | number: '1.0-1' }} kg
+    {{ t('Ligne pointillée = objectif') }} {{ settings().weightGoalKg | number: '1.0-1' }} kg
   </p>
 </section>
 
 <section class="card">
-  <h2>Nouvelle pesée</h2>
+  <h2>{{ t('Nouvelle pesée') }}</h2>
   <div class="add-row">
-    <input type="date" [ngModel]="newDate()" (ngModelChange)="newDate.set($event)" aria-label="Date" />
+    <input
+      type="date"
+      [ngModel]="newDate()"
+      (ngModelChange)="newDate.set($event)"
+      [attr.aria-label]="t('Date')"
+    />
     <input
       type="number"
       inputmode="decimal"
       step="0.1"
-      placeholder="kg"
-      aria-label="Poids en kg"
+      [placeholder]="t('kg')"
+      [attr.aria-label]="t('Poids en kg')"
       [ngModel]="newWeight()"
       (ngModelChange)="newWeight.set($event)"
     />
-    <button class="btn btn-primary" (click)="add()">OK</button>
+    <button class="btn btn-primary" (click)="add()">{{ t('OK') }}</button>
   </div>
 </section>
 
@@ -51,9 +56,9 @@
         <span>{{ entry.weightKg | number: '1.1-1' }} kg</span>
         <span class="muted">{{ pretty(entry.date) }}</span>
       </span>
-      <button class="del" (click)="remove(entry.id)" aria-label="Supprimer">✕</button>
+      <button class="del" (click)="remove(entry.id)" [attr.aria-label]="t('Supprimer')">✕</button>
     </div>
   } @empty {
-    <p class="empty">Aucune pesée.</p>
+    <p class="empty">{{ t('Aucune pesée.') }}</p>
   }
 </section>

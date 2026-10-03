@@ -1,59 +1,62 @@
-<h1>Statistiques</h1>
+<h1>{{ t('Statistiques') }}</h1>
 
 <section class="card summary">
   <div>
-    <span class="muted">Perte totale</span>
+    <span class="muted">{{ t('Perte totale') }}</span>
     <strong>{{ totalLoss() | number: '1.1-1' }} kg</strong>
   </div>
   <div>
-    <span class="muted">Rythme</span>
-    <strong>{{ weeklyRate() | number: '1.2-2' }} kg/sem.</strong>
+    <span class="muted">{{ t('Rythme') }}</span>
+    <strong>{{ weeklyRate() | number: '1.2-2' }} {{ t('kg/sem.') }}</strong>
   </div>
   <div>
-    <span class="muted">Adhérence prot.</span>
+    <span class="muted">{{ t('Adhérence prot.') }}</span>
     <strong>{{ adherenceRate() * 100 | number: '1.0-0' }} %</strong>
   </div>
 </section>
 
 <section class="card">
-  <h2>Projection</h2>
+  <h2>{{ t('Projection') }}</h2>
   @if (projection(); as date) {
     <p class="projection">
-      À ce rythme, objectif {{ settings().weightGoalKg | number: '1.0-1' }} kg atteint vers le
-      <strong>{{ date }}</strong>.
+      {{ t('À ce rythme, objectif') }} {{ settings().weightGoalKg | number: '1.0-1' }}
+      {{ t('kg atteint vers le') }} <strong>{{ date }}</strong
+      >.
     </p>
   } @else {
     <p class="muted projection">
-      Pas encore assez de pesées (ou objectif déjà atteint) pour projeter une date.
+      {{ t('Pas encore assez de pesées (ou objectif déjà atteint) pour projeter une date.') }}
     </p>
   }
 </section>
 
 <section class="card">
-  <h2>Calories moyennes par semaine</h2>
+  <h2>{{ t('Calories moyennes par semaine') }}</h2>
   @if (hasLogs()) {
     <div class="chart">
       <canvas baseChart type="bar" [data]="kcalChart()" [options]="barOptions"></canvas>
     </div>
   } @else {
-    <p class="empty">Aucune entrée dans le journal.</p>
+    <p class="empty">{{ t('Aucune entrée dans le journal.') }}</p>
   }
 </section>
 
 <section class="card">
-  <h2>Cible protéines atteinte</h2>
+  <h2>{{ t('Cible protéines atteinte') }}</h2>
   @if (hasLogs()) {
     <div class="chart">
       <canvas baseChart type="bar" [data]="adherenceChart()" [options]="barOptions"></canvas>
     </div>
-    <p class="muted legend">1 = cible de {{ settings().proteinTarget }} g atteinte ce jour-là.</p>
+    <p class="muted legend">
+      {{ t('1 = cible de {n} g atteinte ce jour-là.', { n: settings().proteinTarget }) }}
+    </p>
   } @else {
-    <p class="empty">Aucune entrée dans le journal.</p>
+    <p class="empty">{{ t('Aucune entrée dans le journal.') }}</p>
   }
 </section>
 
 <section class="card">
-  <h2>Poids — moyenne mobile 7 jours</h2>
+  <h2>{{ t('Poids — moyenne mobile 7 jours') }}</h2>
   <div class="chart">
     <canvas baseChart type="line" [data]="weightChart()" [options]="lineOptions"></canvas>
   </div>

@@ -14,6 +14,7 @@ import { FoodsService } from '../core/foods.service';
 import { LogService } from '../core/log.service';
 import { MealsService } from '../core/meals.service';
 import { MEAL_SLOTS, macrosFor, type Food, type MealSlot } from '../core/models';
+import { t } from '../core/i18n';
 
 type Tab = 'favorites' | 'meals' | 'search' | 'create';
 
@@ -26,30 +27,32 @@ type Tab = 'favorites' | 'meals' | 'search' | 'create';
     <div class="backdrop" (click)="closed.emit()"></div>
     <div class="sheet">
       <header>
-        <select [(ngModel)]="slot" aria-label="Repas">
+        <select [(ngModel)]="slot" [attr.aria-label]="t('Repas')">
           @for (s of slots; track s.id) {
             <option [value]="s.id">{{ s.label }}</option>
           }
         </select>
-        <button class="btn" (click)="closed.emit()">Fermer</button>
+        <button class="btn" (click)="closed.emit()">{{ t('Fermer') }}</button>
       </header>
 
       @if (picked(); as food) {
         <div class="picked">
           <h2>{{ food.name }}</h2>
           <div class="field">
-            <label for="grams">Quantité (g)</label>
+            <label for="grams">{{ t('Quantité (g)') }}</label>
             <input id="grams" type="number" inputmode="numeric" min="1" [(ngModel)]="grams" />
           </div>
           <p class="preview muted">
-            {{ preview().kcal | number: '1.0-0' }} kcal ·
-            P {{ preview().protein | number: '1.0-1' }} ·
-            G {{ preview().carbs | number: '1.0-1' }} ·
-            L {{ preview().fat | number: '1.0-1' }}
+            {{ preview().kcal | number: '1.0-0' }} kcal · P
+            {{ preview().protein | number: '1.0-1' }} · {{ t('G') }}
+            {{ preview().carbs | number: '1.0-1' }} · {{ t('L') }}
+            {{ preview().fat | number: '1.0-1' }}
           </p>
           <div class="row">
-            <button class="btn" (click)="picked.set(null)">Retour</button>
-            <button class="btn btn-primary" style="flex:1" (click)="confirm(food)">Ajouter</button>
+            <button class="btn" (click)="picked.set(null)">{{ t('Retour') }}</button>
+            <button class="btn btn-primary" style="flex:1" (click)="confirm(food)">
+              {{ t('Ajouter') }}
+            </button>
           </div>
         </div>
       } @else {
@@ -67,7 +70,9 @@ type Tab = 'favorites' | 'meals' | 'search' | 'create';
                 <span class="muted">{{ food.kcal | number: '1.0-0' }} kcal/100 g</span>
               </button>
             } @empty {
-              <p class="empty">Aucun favori. Marque des aliments en favori depuis l'onglet Aliments.</p>
+              <p class="empty">
+                {{ t('Aucun favori. Marque des aliments en favori depuis l’onglet Aliments.') }}
+              </p>
             }
           }
           @case ('meals') {
@@ -77,13 +82,13 @@ type Tab = 'favorites' | 'meals' | 'search' | 'create';
                 <span class="muted">{{ meals.totals(meal).kcal | number: '1.0-0' }} kcal</span>
               </button>
             } @empty {
-              <p class="empty">Aucun repas type.</p>
+              <p class="empty">{{ t('Aucun repas type.') }}</p>
             }
           }
           @case ('search') {
             <input
               type="search"
-              placeholder="Rechercher un aliment…"
+              [placeholder]="t('Rechercher un aliment…')"
               [ngModel]="query()"
               (ngModelChange)="query.set($event)"
             />
@@ -93,34 +98,39 @@ type Tab = 'favorites' | 'meals' | 'search' | 'create';
                 <span class="muted">{{ food.kcal | number: '1.0-0' }} kcal/100 g</span>
               </button>
             } @empty {
-              <p class="empty">Aucun résultat.</p>
+              <p class="empty">{{ t('Aucun résultat.') }}</p>
             }
           }
           @case ('create') {
             <div class="field">
-              <label for="n">Nom</label>
+              <label for="n">{{ t('Nom') }}</label>
               <input id="n" [(ngModel)]="draftName" />
             </div>
             <div class="grid">
               <div class="field">
-                <label for="k">kcal /100 g</label>
+                <label for="k">{{ t('kcal /100 g') }}</label>
                 <input id="k" type="number" inputmode="decimal" [(ngModel)]="draftKcal" />
               </div>
               <div class="field">
-                <label for="p">Protéines</label>
+                <label for="p">{{ t('Protéines') }}</label>
                 <input id="p" type="number" inputmode="decimal" [(ngModel)]="draftProtein" />
               </div>
               <div class="field">
-                <label for="c">Glucides</label>
+                <label for="c">{{ t('Glucides') }}</label>
                 <input id="c" type="number" inputmode="decimal" [(ngModel)]="draftCarbs" />
               </div>
               <div class="field">
-                <label for="f">Lipides</label>
+                <label for="f">{{ t('Lipides') }}</label>
                 <input id="f" type="number" inputmode="decimal" [(ngModel)]="draftFat" />
               </div>
             </div>
-            <button class="btn btn-primary" style="width:100%" [disabled]="!draftName().trim()" (click)="createFood()">
-              Créer et ajouter
+            <button
+              class="btn btn-primary"
+              style="width:100%"
+              [disabled]="!draftName().trim()"
+              (click)="createFood()"
+            >
+              {{ t('Créer et ajouter') }}
             </button>
           }
         }
@@ -130,6 +140,7 @@ type Tab = 'favorites' | 'meals' | 'search' | 'create';
   styleUrl: './add-sheet.scss',
 })
 export class AddSheet {
+  protected readonly t = t;
   protected readonly foods = inject(FoodsService);
   protected readonly meals = inject(MealsService);
   private readonly log = inject(LogService);
@@ -140,10 +151,10 @@ export class AddSheet {
 
   protected readonly slots = MEAL_SLOTS;
   protected readonly tabs: { id: Tab; label: string }[] = [
-    { id: 'favorites', label: 'Favoris' },
-    { id: 'meals', label: 'Repas' },
-    { id: 'search', label: 'Recherche' },
-    { id: 'create', label: 'Nouveau' },
+    { id: 'favorites', label: t('Favoris') },
+    { id: 'meals', label: t('Repas') },
+    { id: 'search', label: t('Recherche') },
+    { id: 'create', label: t('Nouveau') },
   ];
 
   protected readonly tab = signal<Tab>('favorites');
